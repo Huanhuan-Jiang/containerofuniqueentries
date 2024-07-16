@@ -18,7 +18,7 @@ target_link_libraries(test_dequeofunique PRIVATE
     GTest::gmock_main
 )
 
-target_link_libraries(test_dequeofunique PRIVATE gamestatus)
+target_link_libraries(test_dequeofunique PRIVATE dequeofunique)
 
 enable_testing()
 

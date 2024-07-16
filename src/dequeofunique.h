@@ -5,25 +5,32 @@
 #include <unordered_set>
 
 namespace containerofunique {
-template <typename T, typename Hash = std::hash<T>>
-class DequeOfUniqueEntries {
+template <class _Value, class _Hash = std::hash<_Value>, class _Pred = std::equal_to<_Value>, class _Alloc = std::allocator<_Value> >
+class dequeofunique {
   std::deque<T> deque_;
   std::unordered_set<T, Hash> set_;
 
  public:
-  using value_type = T;
+  using value_type = _Value;
+  using allocator_type = _Alloc;
+  using __alloc_traits = allocator_traits<allocator_type>;
+  static_assert(__check_valid_allocator<allocator_type>::value, "");
+  static_assert(is_same<typename allocator_type::value_type, value_type>::value,
+              "Allocator::value_type must be same type as value_type");
 
-  DequeOfUniqueEntries() = default;
 
-  DequeOfUniqueEntries(const std::initializer_list<T>& initializer)
-      : DequeOfUniqueEntries(initializer.begin(), initializer.end()) {}
 
-  DequeOfUniqueEntries(const DequeOfUniqueEntries& other) = default;
+  dequeofunique() = default;
 
-  DequeOfUniqueEntries& operator=(DequeOfUniqueEntries& other) = default;
+  dequeofunique(const std::initializer_list<T>& initializer)
+      : dequeofunique(initializer.begin(), initializer.end()) {}
+
+  dequeofunique(const dequeofunique& other) = default;
+
+  dequeofunique& operator=(dequeofunique& other) = default;
 
   template <class InputIt>
-  DequeOfUniqueEntries(InputIt first, InputIt last) {
+  dequeofunique(InputIt first, InputIt last) {
     pushBack(first, last);
   }
 
@@ -39,7 +46,7 @@ class DequeOfUniqueEntries {
     }
   }
 
-  bool pushBack(const DequeOfUniqueEntries<T, Hash>& other) {
+  bool pushBack(const dequeofunique<T, Hash>& other) {
     return pushBack(other.deque());
   }
 

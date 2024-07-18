@@ -106,23 +106,6 @@ class dequeofunique {
     return *this;
   };
 
-  _deque_iterator __deque_begin() { return deque_.begin(); }
-  _deque_iterator __deque_end() { return deque_.end(); }
-  _deque_const_iterator __deque_cbegin() const { return deque_.begin(); }
-  _deque_const_iterator __deque_cend() const { return deque_.end(); }
-
-  _deque_reverse_iterator __deque_rbegin() { return deque_.rbegin(); }
-  _deque_reverse_iterator __deque_rend() { return deque_.rend(); }
-  _deque_const_reverse_iterator __deque_crbegin() const {
-    return deque_.rbegin();
-  }
-  _deque_const_reverse_iterator __deque_crend() const { return deque_.rend(); }
-
-  _unordered_set_iterator __set_begin() { return set_.begin(); }
-  _unordered_set_iterator __set_end() { return set_.end(); }
-  _unordered_set_const_iterator __set_begin() const { return set_.begin(); }
-  _unordered_set_const_iterator __set_end() const { return set_.end(); }
-
   // To do list 9: modifty the iterator and make sure that when the element was
   // changed by deque_iterator, the set will get updated.
   class __unique_iterator {
@@ -156,16 +139,11 @@ class dequeofunique {
       return *deque_iter_;
     }
 
-    pointer operator-> () const {
+    pointer operator-> () {
       __update_set();
       return deque_iter_.operator->();
     }
 
-    pointer operator-> () const {
-      return deque_iter_.operator->();
-    }
-
-  // what about ++() const and --() const?
     __unique_iterator& operator++(){
       ++deque_iter_;
       __update_set();
@@ -199,13 +177,96 @@ class dequeofunique {
     bool operator!=(__unique_iterator& other) const{
       return deque_iter_ != other.deque_iter_;
     }
-  };
+  }; // class __unique_iterator
+
+  class __const_unique_iterator {
+    typename std::deque<T, Allocator>::iterator deque_iter_;
+    typename std::unordered_set<T, Hash, KeyEqual, Allocator>& set_ref_;
+
+   public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using value_type = T;
+    using difference_type = typename std::deque<T, Allocator>::difference_type;
+    using pointer = typename std::deque<T, Allocator>::pointer;
+    using reference = typename std::deque<T, Allocator>::reference;
+
+    __const_unique_iterator(
+        typename std::deque<T, Allocator>::iterator deque_iter,
+        std::unordered_set<T, Hash, KeyEqual, Allocator>& set_ref)
+        : deque_iter_(deque_iter), set_ref_(set_ref) {}
+
+        void __update_set(){
+          auto element = *deque_iter_;
+          auto it = set_ref_.find(element);
+          if(it != set_ref_.end()) {
+            set_ref_.erase(it);
+            set_ref_.insert(elment);
+          }
+        }
   
-  //iterator begin() {
-  //  return __deque_begin();
-  //}
-  //iterator end() { return __deque_end(); }
-  //const_iterator cbegin() const noexcept { return __deque_cbegin(); }
+  public:
+    reference operator*() const{
+      return *deque_iter_;
+    }
+
+    pointer operator-> () const {
+      return deque_iter_.operator->();
+    }
+
+    __const_unique_iterator& operator++(){
+      ++deque_iter_;
+      return *this;
+    }
+
+    __const_unique_iterator& operator++(value_type){
+      __const_unique_iterator& tmp = *this;
+      ++deque_iter_;
+      return *tmp;
+    }
+
+    __const_unique_iterator& operator--(){
+      --deque_iter_;
+      return *this;
+    }
+
+    __const_unique_iterator& operator--(value_type){
+      __const_unique_iterator& tmp = *this;
+      --deque_iter_;
+      return *tmp;
+    }
+
+    bool operator==(__const_unique_iterator& other) const{
+      return deque_iter_ == other.deque_iter_;
+    }
+
+    bool operator!=(__const_unique_iterator& other) const{
+      return deque_iter_ != other.deque_iter_;
+    }
+  }; // class __const_unique_iterator
+
+  class __reverse_unique_iterator {
+
+  } // class __reverse_unique_iterator
+
+  class __const_reverse_unique_iterator {
+
+  } // class __const_reverse_unique_iterator
+
+
+
+
+  
+  __unique_iterator begin() {
+    return __unique_iterator(deque_.begin(), set_)
+  }
+
+  __unique_iterator end() { 
+    return __unique_iterator(deque_.end(), set_); 
+  }
+  
+  const_iterator cbegin() const noexcept { 
+    return __deque_cbegin(); 
+  }
   //const_iterator cend() const noexcept { return __deque_cend(); }
 
   //reverse_iterator rbegin() { return __deque_rbegin(); }

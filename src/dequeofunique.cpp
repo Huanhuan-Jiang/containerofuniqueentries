@@ -8,6 +8,7 @@
 #include <ranges>       // For ranges
 #include <type_traits>  // For std::is_same
 #include <unordered_set>
+#include <algorithm>    // For std::find
 
 namespace containerofunique {
 
@@ -110,25 +111,107 @@ class dequeofunique {
   _deque_const_iterator __deque_cbegin() const { return deque_.begin(); }
   _deque_const_iterator __deque_cend() const { return deque_.end(); }
 
-  _deque_iterator __deque_rbegin() { return deque_.rbegin(); }
-  _deque_iterator __deque_rend() { return deque_.rend(); }
-  _deque_const_iterator __deque_crbegin() const { return deque_.rbegin(); }
-  _deque_const_iterator __deque_crend() const { return deque_.rend(); }
+  _deque_reverse_iterator __deque_rbegin() { return deque_.rbegin(); }
+  _deque_reverse_iterator __deque_rend() { return deque_.rend(); }
+  _deque_const_reverse_iterator __deque_crbegin() const {
+    return deque_.rbegin();
+  }
+  _deque_const_reverse_iterator __deque_crend() const { return deque_.rend(); }
 
   _unordered_set_iterator __set_begin() { return set_.begin(); }
   _unordered_set_iterator __set_end() { return set_.end(); }
   _unordered_set_const_iterator __set_begin() const { return set_.begin(); }
   _unordered_set_const_iterator __set_end() const { return set_.end(); }
 
-  iterator begin() { return __deque_begin(); }
-  iterator end() { return __deque_end(); }
-  const_iterator cbegin() const { return __deque_cbegin(); }
-  const_iterator cend() const { return __deque_cend(); }
+  // To do list 9: modifty the iterator and make sure that when the element was
+  // changed by deque_iterator, the set will get updated.
+  class __unique_iterator {
+    typename std::deque<T, Allocator>::iterator deque_iter_;
+    typename std::unordered_set<T, Hash, KeyEqual, Allocator>& set_ref_;
 
-  iterator rbegin() { return __deque_rbegin(); }
-  iterator rend() { return __deque_rend(); }
-  const_iterator crbegin() const { return __deque_crbegin(); }
-  const_iterator crend() const { return __deque_crend(); }
+   public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using value_type = T;
+    using difference_type = typename std::deque<T, Allocator>::difference_type;
+    using pointer = typename std::deque<T, Allocator>::pointer;
+    using reference = typename std::deque<T, Allocator>::reference;
+
+    __unique_iterator(
+        typename std::deque<T, Allocator>::iterator deque_iter,
+        std::unordered_set<T, Hash, KeyEqual, Allocator>& set_ref)
+        : deque_iter_(deque_iter), set_ref_(set_ref) {}
+
+        void __update_set(){
+          auto element = *deque_iter_;
+          auto it = set_ref_.find(element);
+          if(it != set_ref_.end()) {
+            set_ref_.erase(it);
+            set_ref_.insert(elment);
+          }
+        }
+  
+  public:
+    reference operator*(){
+      __update_set();
+      return *deque_iter_;
+    }
+
+    pointer operator-> () const {
+      __update_set();
+      return deque_iter_.operator->();
+    }
+
+    pointer operator-> () const {
+      return deque_iter_.operator->();
+    }
+
+  // what about ++() const and --() const?
+    __unique_iterator& operator++(){
+      ++deque_iter_;
+      __update_set();
+      return *this;
+    }
+
+    __unique_iterator& operator++(value_type){
+      __unique_iterator& tmp = *this;
+      ++deque_iter_;
+      __update_set();
+      return *tmp;
+    }
+
+    __unique_iterator& operator--(){
+      --deque_iter_;
+      __update_set();
+      return *this;
+    }
+
+    __unique_iterator& operator--(value_type){
+      __unique_iterator& tmp = *this;
+      --deque_iter_;
+      __update_set();
+      return *tmp;
+    }
+
+    bool operator==(__unique_iterator& other) const{
+      return deque_iter_ == other.deque_iter_;
+    }
+
+    bool operator!=(__unique_iterator& other) const{
+      return deque_iter_ != other.deque_iter_;
+    }
+  };
+  
+  //iterator begin() {
+  //  return __deque_begin();
+  //}
+  //iterator end() { return __deque_end(); }
+  //const_iterator cbegin() const noexcept { return __deque_cbegin(); }
+  //const_iterator cend() const noexcept { return __deque_cend(); }
+
+  //reverse_iterator rbegin() { return __deque_rbegin(); }
+  //reverse_iterator rend() { return __deque_rend(); }
+  //const_reverse_iterator crbegin() const noexcept { return __deque_crbegin(); }
+  //const_reverse_iterator crend() const noexcept { return __deque_crend(); }
 
   template <class InputIt>
   void push_back(InputIt first, InputIt last) {
@@ -145,8 +228,11 @@ class dequeofunique {
     return false;
   }
 
+  // To do list 8: do I need to consider the Hash of other? I don't think it
+  // makes sense to include the Hash of other since the dequeofunique is
+  // supposed to store elements with same type and Hash.
   bool push_back(const dequeofunique<T, Hash>& other) {
-    return push_back(other.deque_());
+    return push_back(other.deque_);
   }
 
   bool push_back(const std::deque<T>& other) {
@@ -174,38 +260,104 @@ class dequeofunique {
     for (const auto& elem : set_) {
       std::cout << elem << " ";
     }
-    std::cout << "\n";
+    std::cout << ".\n";
     std::cout << "Size of set is: " << set_.size() << ".\n";
+    std::cout << "\n";
   }
 };
 }  // namespace containerofunique
 
-void print(std::deque<T> dq) {
-  for (T entry : dq) {
-    std::cout <<
-  }
-}
-
-void print_set() {}
-
 int main() {
-  std::cout << "Test constructors using int:\n";
-  //  To do list 6: print out the objects below:
+  std::cout << "Test constructors and operator '=' using int:\n";
   containerofunique::dequeofunique<int> dq_int_empty;
+  std::cout << "Print dq_int_empty:\n";
+  dq_int_empty.print();
+
   containerofunique::dequeofunique<int> dq_int_init1{1};
+  std::cout << "Print dq_int_init1:\n";
+  dq_int_init1.print();
+
   containerofunique::dequeofunique<int> dq_int_init2{1, 2};
+  std::cout << "Print dq_int_init2:\n";
+  dq_int_init2.print();
+
   containerofunique::dequeofunique<int> dq_int_init3{1, 2, 2, 2};
+  std::cout << "Print dq_int_init3:\n";
+  dq_int_init3.print();
+
   containerofunique::dequeofunique<int> dq_int_init4(dq_int_init3);
+  std::cout << "Print dq_int_init4:\n";
+  dq_int_init4.print();
+
   containerofunique::dequeofunique<int> dq_int_init5(std::move(dq_int_init3));
-  containerofunique::dequeofunique<int> dq_int_init6 = dq_int_init3;
-  containerofunique::dequeofunique<int> dq_int_init7 = std::move(dq_int_init3);
-  containerofunique::dequeofunique<int> dq_int_init8 = {1, 2, 2, 2};
-  // End of to do list 6
+  std::cout << "Print dq_int_init5:\n";
+  dq_int_init5.print();
+  std::cout << "Print dq_int_init3:\n";
+  dq_int_init3.print();
+
+  containerofunique::dequeofunique<int> dq_int_init6 = dq_int_init5;
+  std::cout << "Print dq_int_init6:\n";
+  dq_int_init6.print();
+
+  containerofunique::dequeofunique<int> dq_int_init7 = std::move(dq_int_init5);
+  std::cout << "Print dq_int_init7:\n";
+  dq_int_init7.print();
+  std::cout << "Print dq_int_init5:\n";
+  dq_int_init5.print();
+
+  containerofunique::dequeofunique<int> dq_int_init8 = {4, 2, 6, 2, 1};
+  std::cout << "Print dq_int_init8:\n";
+  dq_int_init8.print();
 
   std::cout << "Test push_back():\n";
-  // To do list 7: print out the objects after push_back;
-  containerofunique::dequeofunique<int> dq_int_init1.push_back(1);
-  containerofunique::dequeofunique<int> dq_int_init1.push_back(2);
-  containerofunique::dequeofunique<int> dq_int_init1.push_back(2, 2);
-  // To do list 7:
+  std::cout << "Print dq_int_init1:\n";
+  dq_int_init1.print();
+
+  dq_int_init1.push_back(1);
+  std::cout << "Print dq_int_init1:\n";
+  dq_int_init1.print();
+
+  dq_int_init1.push_back(2);
+  std::cout << "Print dq_int_init1:\n";
+  dq_int_init1.print();
+
+  dq_int_init1.push_back(dq_int_init8);
+  std::cout << "Print dq_int_init1:\n";
+  dq_int_init1.print();
+
+  std::deque<int> dq_int = {8, 9, 2};
+  dq_int_init1.push_back(dq_int);
+  std::cout << "Print dq_int_init1:\n";
+  dq_int_init1.print();
+
+  std::cout << "Test iterators using int:\n";
+  auto i = dq_int_init1.begin();
+  std::cout << "The first element of dq_int_init1 is: " << *dq_int_init1.begin()
+            << ".\n";
+  *i = 5;
+  std::cout << "The first element of dq_int_init1 is: " << *dq_int_init1.begin()
+            << ".\n";
+  std::cout << "The first element of dq_int_init1 is: "
+            << *dq_int_init1.cbegin() << ".\n";
+  std::cout << "The last element of dq_int_init1 is: " << *--dq_int_init1.end()
+            << ".\n";
+  std::cout << "The last element of dq_int_init1 is: " << *--dq_int_init1.cend()
+            << ".\n";
+
+  std::cout << "Print dq_int_init1:\n";
+  dq_int_init1.print();
+  auto ii = dq_int_init1.rbegin();
+  std::cout << "The last element of dq_int_init1 is: " << *dq_int_init1.rbegin()
+            << ".\n";
+  *ii = 55;
+  std::cout << "Print dq_int_init1:\n";
+  dq_int_init1.print();
+
+  // std::cout << "The last element of dq_int_init1 is: " <<
+  // *dq_int_init1.rbegin() << ".\n"; std::cout << "The last element of
+  // dq_int_init1 is: " << *dq_int_init1.crbegin() << ".\n"; std::cout << "The
+  // first element of dq_int_init1 is : " << *--dq_int_init1.rend() << ".\n";
+  // std::cout << "The first element of dq_int_init1 is: " <<
+  // *--dq_int_init1.crend() << ".\n"; std::cout << "Print dq_int_init1:\n";
+  // dq_int_init1.print();
 }

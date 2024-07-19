@@ -114,11 +114,11 @@ class dequeofunique {
     return *this;
   };
 
-  const_iterator cbegin() const noexcept { return const_iterator(deque_.cbegin(), set_); }
-  const_iterator cend() const noexcept { return const_iterator(deque_.cend(), set_); }
+  const_iterator cbegin() const noexcept { return deque_.cbegin(); }
+  const_iterator cend() const noexcept { return deque_.cend(); }
   
-  const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(deque_.crbegin(), set_); }
-  const_reverse_iterator crend() const noexcept { return const_reverse_iterator(deque_.crend(), set_); }
+  const_reverse_iterator crbegin() const noexcept { return deque_.crbegin(); }
+  const_reverse_iterator crend() const noexcept { return deque_.crend(); }
 
   template <class InputIt>
   void push_back(InputIt first, InputIt last) {
@@ -156,7 +156,7 @@ class dequeofunique {
   __unordered_set_type set() { return set_; }
 
   void print() const {
-    std::cout << "Deque: ";
+    std::cout << "Print out the dequeofunique.\n Deque: ";
     for (const auto& elem : deque_) {
       std::cout << elem << " ";
     }
@@ -241,4 +241,28 @@ int main() {
   std::cout << "Print dq_int_init1:\n";
   dq_int_init1.print();
 
+  std::cout << "Test iterators using int:\n";
+  containerofunique::dequeofunique<int> dq;
+  dq.push_back(1);
+  dq.push_back(2);
+  dq.push_back(3);
+  dq.print();
+
+  std::cout << "The first element of dq is: " << *dq.cbegin() << ".\n";
+  auto it = dq.cbegin();
+  std::cout << "The second element of dq is: " << *(++it) << ".\n";
+  std::cout << "The second element of dq is: "  << *it++  << ".\n"; 
+  std::cout << "The third element of dq is: "  << *it  << ".\n";
+  std::cout << "The second element of dq is: "  << *(--it) << ".\n";
+  std::cout << "The second element of dq is: "  << *it-- << ".\n";
+  std::cout << "The third element of dq is: "  << *dq.cend()  << ".\n";
+
+  std::cout << "The first element of reversed dq is : "<< *dq.crbegin() << ".\n";
+  auto rit = dq.cend();
+  std::cout << "The second element of reversed dq is : "<< *(++rit) << ".\n";
+  std::cout << "The second element of reversed dq is : "<< *rit++ << ".\n";
+  std::cout << "The third element of reversed dq is : "<< *rit << ".\n";
+  std::cout << "The second element of reversed dq is : "<< *(--rit) << ".\n";
+  std::cout << "The second element of reversed dq is : "<< *rit-- << ".\n";
+  std::cout << "The third element of reversed dq is : "<< *dq.crend() << ".\n";
 }

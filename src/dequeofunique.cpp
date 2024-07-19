@@ -9,6 +9,7 @@
 #include <ranges>       // For ranges
 #include <type_traits>  // For std::is_same
 #include <unordered_set>
+#include <cassert>      // For std::assert
 
 namespace containerofunique {
 
@@ -83,7 +84,7 @@ class dequeofunique {
 
    public:
     reference operator*() {
-      //__update_set();
+      __update_set();
       return *deque_iter_;
     }
 
@@ -493,27 +494,24 @@ int main() {
   dq_int_init1.print();
 
   std::cout << "Test iterators using int:\n";
-  *dq_int_init1.begin()=5;
-  std::cout << "The first element of dq_int_init1 is: " << *dq_int_init1.begin()
-            << ".\n";
-  //*i = 5;
-  std::cout << "The first element of dq_int_init1 is: " << *dq_int_init1.begin()
-            << ".\n";
-  std::cout << "The first element of dq_int_init1 is: "
-            << *dq_int_init1.cbegin() << ".\n";
-  std::cout << "The last element of dq_int_init1 is: " << *--dq_int_init1.end()
-            << ".\n";
-  std::cout << "The last element of dq_int_init1 is: " << *--dq_int_init1.cend()
-            << ".\n";
+  containerofunique::dequeofunique<int> dq;
+  dq.push_back(1);
+  dq.push_back(2);
+  dq.push_back(3);
+  dq.print();
 
-  std::cout << "Print dq_int_init1:\n";
-  dq_int_init1.print();
-  auto ii = dq_int_init1.rbegin();
-  std::cout << "The last element of dq_int_init1 is: " << *dq_int_init1.rbegin()
-            << ".\n";
-  *ii = 55;
-  std::cout << "Print dq_int_init1:\n";
-  dq_int_init1.print();
+  // The codes below does not work as expected. 
+  auto it = dq.begin();
+  *it = 10;
+
+  assert(dq.deque().front() == 10);
+  assert(dq.set().find(10) != dq.set().end());
+
+  ++it;
+  *it = 20;
+
+  assert(dq.deque().front() == 20);
+  assert(dq.set().find(20) != dq.set().end());
 
   // std::cout << "The last element of dq_int_init1 is: " <<
   // *dq_int_init1.rbegin() << ".\n"; std::cout << "The last element of

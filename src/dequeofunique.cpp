@@ -112,6 +112,10 @@ class dequeofunique {
   };
 
   // Element access
+  // at: If pos is not within the range of the container, an exception of type std::out_of_range is thrown.
+  // []: Accessing a nonexistent element through this operator is undefined behavior.
+  // Calling front on an empty container causes undefined behavior.
+  // Calling back on an empty container causes undefined behavior.
   const_reference at(size_type pos) const { return deque_.at(pos); }
   const_reference front() const { return deque_.front(); }
   const_reference operator[](size_type pos) const { return deque_[pos]; }
@@ -123,6 +127,18 @@ class dequeofunique {
 
   const_reverse_iterator crbegin() const noexcept { return deque_.crbegin(); }
   const_reverse_iterator crend() const noexcept { return deque_.crend(); }
+
+  // Modifiers
+  void clear() noexcept {
+    deque_.clear();
+    set_.clear();
+  }
+
+  void pop_front() {
+    auto f = deque_.front();
+    deque_.pop_front();
+    if(set_.find(f)!=set_.end()){set_.erase(set_.find(f));}
+  }
 
   template <class InputIt>
   void push_back(InputIt first, InputIt last) {
@@ -260,6 +276,10 @@ int main() {
   std::cout << "The last element of dq_int1: " << dq_int1.back() << ".\n";
 
   std::cout << "\n";
+  std::cout << "Test modifiers:\n";
+  
+
+  std::cout << "\n";
   std::cout << "Test push_back():\n";
   std::cout << "Print dq_int_init1:\n";
   dq_int_init1.print();
@@ -308,6 +328,23 @@ int main() {
   std::cout << "The second element of reversed dq is : " << *rit-- << ".\n";
   std::cout << "The third element of reversed dq is : " << *--dq.crend()
             << ".\n";
+
+  std::cout << "\nTest modifiers using int: \n";
+  dq.print();
+  dq.clear();
+  std::cout << "Print dq after clear: \n";
+  dq.print();
+  std::cout << "\n";
+  dq.push_back(1);
+  dq.push_back(2);
+  dq.push_back(3);
+  dq.print();
+  dq.pop_front();
+  std::cout << "Print dq after pop_front: \n";
+  dq.print();
+
+
+
 
   return 0;
 }

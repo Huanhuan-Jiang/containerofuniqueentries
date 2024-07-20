@@ -112,9 +112,10 @@ class dequeofunique {
   };
 
   // Element access
-  // at: If pos is not within the range of the container, an exception of type std::out_of_range is thrown.
-  // []: Accessing a nonexistent element through this operator is undefined behavior.
-  // Calling front on an empty container causes undefined behavior.
+  // at: If pos is not within the range of the container, an exception of type
+  // std::out_of_range is thrown.
+  // []: Accessing a nonexistent element through this operator is undefined
+  // behavior. Calling front on an empty container causes undefined behavior.
   // Calling back on an empty container causes undefined behavior.
   const_reference at(size_type pos) const { return deque_.at(pos); }
   const_reference front() const { return deque_.front(); }
@@ -134,10 +135,26 @@ class dequeofunique {
     set_.clear();
   }
 
+  const_iterator erase(const_iterator pos) {
+    set_.erase(*pos);
+    return deque_.erase(pos);
+  }
+
+  const_iterator erase( const_iterator first, const_iterator last ) {
+    for(const_iterator it=first; it!=last; ++it) {
+      set_.erase(*it);
+    }
+    if(last != deque_.end()) {set_.erase(*last);}
+    return deque_.erase(first, last);
+  }
+
   void pop_front() {
     auto f = deque_.front();
     deque_.pop_front();
-    if(set_.find(f)!=set_.end()){set_.erase(set_.find(f));}
+    auto it = set_.find(f);
+    if (it != set_.end()) {
+      set_.erase(it);
+    }
   }
 
   template <class InputIt>
@@ -277,7 +294,6 @@ int main() {
 
   std::cout << "\n";
   std::cout << "Test modifiers:\n";
-  
 
   std::cout << "\n";
   std::cout << "Test push_back():\n";
@@ -335,16 +351,23 @@ int main() {
   std::cout << "Print dq after clear: \n";
   dq.print();
   std::cout << "\n";
-  dq.push_back(1);
-  dq.push_back(2);
-  dq.push_back(3);
+  
+  dq=containerofunique::dequeofunique<int>({1,2,3,4});
   dq.print();
   dq.pop_front();
   std::cout << "Print dq after pop_front: \n";
   dq.print();
+  std::cout << "Print *dq.erase(dq.cbegin()): " << *dq.erase(dq.cbegin())
+            << "\n";
+  std::cout << "Print dq after erase one element: \n";
+  dq.print();
 
-
-
+  dq.clear();
+  dq=containerofunique::dequeofunique<int>({1,2,3,4});
+  dq.print();
+  dq.erase(dq.cbegin(), dq.cbegin() + 2);
+  std::cout << "Print dq after erase a range of elements: \n";
+  dq.print();
 
   return 0;
 }

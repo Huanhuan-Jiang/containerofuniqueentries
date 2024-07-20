@@ -52,9 +52,6 @@ class dequeofunique {
       typename __unordered_set_type::const_iterator;
   using _set_reference = typename __unordered_set_type::reference;
 
-  // To do list 9: modifty the iterator and make sure that when the element was
-  // changed by deque_iterator, the set will get updated.
-
   using iterator = _deque_iterator;
   using const_iterator = _deque_const_iterator;
   using reverse_iterator = _deque_reverse_iterator;
@@ -140,13 +137,65 @@ class dequeofunique {
     return deque_.erase(pos);
   }
 
-  const_iterator erase( const_iterator first, const_iterator last ) {
-    for(const_iterator it=first; it!=last; ++it) {
+  const_iterator erase(const_iterator first, const_iterator last) {
+    for (const_iterator it = first; it != last; ++it) {
       set_.erase(*it);
     }
-    if(last != deque_.end()) {set_.erase(*last);}
     return deque_.erase(first, last);
   }
+
+  // To do list 11:
+  std::pair<const_iterator, bool> insert(const_iterator pos, const T& value) {
+    if (set_.insert(value).second) {
+      return std::make_pair(deque_.insert(pos, value), true);
+    }
+    return std::make_pair(pos, false);
+  }
+
+  std::pair<const_iterator, bool> insert(const_iterator pos, T&& value) {
+    if (set_.insert(value).second) {
+      return std::make_pair(deque_.insert(pos, std::move(value)), true);
+    }
+    return std::make_pair(pos, false);
+  };
+
+  template <class InputIt>
+  std::pair<const_iterator, bool> insert(const_iterator pos, InputIt first,
+                                         InputIt last) {
+    bool any_added = false;
+    int num_inserted = 0;
+    auto return_it = pos;
+    for (const_iterator it = first; it != last; ++it) {
+      auto added = set_.insert(*it).second;
+      if (added) {
+        auto tmp_it = deque_.insert(pos, *it);
+        if (++num_inserted == 1) {
+          return_it = tmp_it;
+        }
+      }
+      any_added = any_added || added;
+    }
+    return (std::make_pair(return_it, any_added));
+  }
+
+  std::pair<const_iterator, bool> insert(const_iterator pos,
+                                         std::initializer_list<T> ilist) {
+    bool any_added = false;
+    int num_inserted = 0;
+    auto return_it = pos;
+    for (auto it = ilist.begin(); it != ilist.end(); ++it) {
+      auto added = set_.insert(*it).second;
+      if (added) {
+        auto tmp_it = deque_.insert(pos, *it);
+        if (++num_inserted == 1) {
+          return_it = tmp_it;
+        }
+      }
+      any_added = any_added || added;
+    }
+    return (std::make_pair(return_it, any_added));
+  }
+  // End of to do list 11
 
   void pop_front() {
     auto f = deque_.front();
@@ -351,8 +400,8 @@ int main() {
   std::cout << "Print dq after clear: \n";
   dq.print();
   std::cout << "\n";
-  
-  dq=containerofunique::dequeofunique<int>({1,2,3,4});
+
+  dq = containerofunique::dequeofunique<int>({1, 2, 3, 4});
   dq.print();
   dq.pop_front();
   std::cout << "Print dq after pop_front: \n";
@@ -363,11 +412,45 @@ int main() {
   dq.print();
 
   dq.clear();
-  dq=containerofunique::dequeofunique<int>({1,2,3,4});
+  dq = containerofunique::dequeofunique<int>({1, 2, 3, 4});
   dq.print();
   dq.erase(dq.cbegin(), dq.cbegin() + 2);
   std::cout << "Print dq after erase a range of elements: \n";
   dq.print();
 
+  int value = 1;
+  if (dq.insert(dq.cbegin(), value).second) {
+    std::cout << "Print dq after insert one lvalue 1: \n";
+    dq.print();
+  }
+
+  if (dq.insert(dq.cbegin(), value).second) {
+    std::cout << "Print dq after insert one lvalue 1 again: \n";  // no printing
+    dq.print();
+  }
+
+  int value2 = 2;
+  if (dq.insert(dq.cbegin() + 1, std::move(value2)).second) {
+    std::cout << "Print dq after insert one rvalue 2: \n";
+    dq.print();
+  }
+
+  auto values = containerofunique::dequeofunique<int>({1, 2, 3, 4});
+  dq.clear();
+  if (dq.insert(dq.cbegin(), values.cbegin(), values.cbegin() + 2).second) {
+    std::cout << "Print dq after insert muliple elements: \n";
+    dq.print();
+  }
+  values.clear();
+  values = containerofunique::dequeofunique<int>({2, 5, 7, 8});
+  if (dq.insert(dq.cbegin(), values.cbegin(), values.cbegin() + 3).second) {
+    std::cout
+        << "Print dq after insert muliple elements again: \n";  // no printing
+    dq.print();
+  }
+  if (dq.insert(dq.cbegin(), {1, 2, 3, 4}).second) {
+    std::cout << "Print dq after insert an initilizer list: \n";
+    dq.print();
+  }
   return 0;
 }

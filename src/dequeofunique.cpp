@@ -223,10 +223,13 @@ class dequeofunique {
   void pop_front() {
     auto f = deque_.front();
     deque_.pop_front();
-    auto it = set_.find(f);
-    if (it != set_.end()) {
-      set_.erase(it);
-    }
+    set_.erase(f);
+  }
+
+  void pop_back() {
+    auto f = deque_.back();
+    deque_.pop_back();
+    set_.erase(f);
   }
 
   template <class InputIt>
@@ -424,18 +427,18 @@ int main() {
   dq.print();
   std::cout << "\n";
 
+  dq.clear();
   dq = containerofunique::dequeofunique<int>({1, 2, 3, 4});
-  dq.print();
   dq.pop_front();
   std::cout << "Print dq after pop_front: \n";
   dq.print();
-  std::cout << "Print *dq.erase(dq.cbegin()): " << *dq.erase(dq.cbegin())
-            << "\n";
-  std::cout << "Print dq after erase one element: \n";
+  dq.pop_back();
+  std::cout << "Print dq after pop_back: \n";
   dq.print();
 
   dq.clear();
   dq = containerofunique::dequeofunique<int>({1, 2, 3, 4});
+  std::cout << "Print dq after erase one element:" <<  *dq.erase(dq.cbegin()) << "\n";
   dq.print();
   dq.erase(dq.cbegin(), dq.cbegin() + 2);
   std::cout << "Print dq after erase a range of elements: \n";

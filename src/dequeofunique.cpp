@@ -205,6 +205,14 @@ class dequeofunique {
   }
 
   template< class... Args >
+  std::optional<std::reference_wrapper<T>> emplace_front( Args&&... args ){
+    if(set_.emplace(std::forward<Args>(args)...).second) { 
+      return deque_.emplace_front(std::forward<Args>(args)...); 
+      }
+      return std::nullopt; 
+  }
+
+  template< class... Args >
   std::optional<std::reference_wrapper<T>> emplace_back( Args&&... args ){
     if(set_.emplace(std::forward<Args>(args)...).second) { 
       return deque_.emplace_back(std::forward<Args>(args)...); 
@@ -484,6 +492,15 @@ int main() {
   dq.print();
   dq.emplace_back(7);
   std::cout<<"Emplace_back with 7:\n";
+  dq.print();
+
+  dq.clear();
+  dq = containerofunique::dequeofunique<int>({1, 2, 3, 4});
+  dq.emplace_front(2);
+  std::cout<<"Emplace_front with 2:\n";
+  dq.print();
+  dq.emplace_front(7);
+  std::cout<<"Emplace_front with 7:\n";
   dq.print();
 
   return 0;

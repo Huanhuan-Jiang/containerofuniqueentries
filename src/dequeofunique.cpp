@@ -1,15 +1,16 @@
 // #pragma once
 
-#include <algorithm>  // For std::find
-#include <cassert>    // For std::assert
 #include <deque>
+#include <unordered_set>
 #include <functional>  // For std::hash
 #include <initializer_list>
 #include <iostream>
 #include <memory>       // For std::allocator
 #include <ranges>       // For ranges
 #include <type_traits>  // For std::is_same
-#include <unordered_set>
+#include <algorithm>    // For std::find
+#include <cassert>      // For std::assert
+#include <optional>     // For std::nullopt
 
 namespace containerofunique {
 
@@ -197,11 +198,18 @@ class dequeofunique {
   
   template< class... Args >
   std::pair<const_iterator, bool> emplace( const_iterator pos, Args&&... args ){
-    T tmp(std::forward<Args>(args)...);
-    if(set_.emplace(tmp).second) { 
-      return(std::make_pair(deque_.emplace(pos, tmp), true)); 
+    if(set_.emplace(std::forward<Args>(args)...).second) { 
+      return(std::make_pair(deque_.emplace(pos, std::forward<Args>(args)...), true)); 
       }
       return(std::make_pair(pos, false)); 
+  }
+
+  template< class... Args >
+  std::optional<std::reference_wrapper<T>> emplace_back( Args&&... args ){
+    if(set_.emplace(std::forward<Args>(args)...).second) { 
+      return deque_.emplace_back(std::forward<Args>(args)...); 
+      }
+      return std::nullopt; 
   }
 
   void pop_front() {
@@ -467,6 +475,15 @@ int main() {
   dq.print();
   dq.emplace(dq.cbegin()+3,7);
   std::cout<<"Emplace with 7:\n";
+  dq.print();
+
+  dq.clear();
+  dq = containerofunique::dequeofunique<int>({1, 2, 3, 4});
+  dq.emplace_back(2);
+  std::cout<<"Emplace_back with 2:\n";
+  dq.print();
+  dq.emplace_back(7);
+  std::cout<<"Emplace_back with 7:\n";
   dq.print();
 
   return 0;

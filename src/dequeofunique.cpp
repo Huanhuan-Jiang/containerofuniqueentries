@@ -144,7 +144,6 @@ class dequeofunique {
     return deque_.erase(first, last);
   }
 
-  // To do list 11:
   std::pair<const_iterator, bool> insert(const_iterator pos, const T& value) {
     if (set_.insert(value).second) {
       return std::make_pair(deque_.insert(pos, value), true);
@@ -195,7 +194,15 @@ class dequeofunique {
     }
     return (std::make_pair(return_it, any_added));
   }
-  // End of to do list 11
+  
+  template< class... Args >
+  std::pair<const_iterator, bool> emplace( const_iterator pos, Args&&... args ){
+    T tmp(std::forward<Args>(args)...);
+    if(set_.emplace(tmp).second) { 
+      return(std::make_pair(deque_.emplace(pos, tmp), true)); 
+      }
+      return(std::make_pair(pos, false)); 
+  }
 
   void pop_front() {
     auto f = deque_.front();
@@ -452,5 +459,15 @@ int main() {
     std::cout << "Print dq after insert an initilizer list: \n";
     dq.print();
   }
+
+  dq.clear();
+  dq = containerofunique::dequeofunique<int>({1, 2, 3, 4});
+  dq.emplace(dq.cbegin()+2, 2);
+  std::cout<<"Emplace with 2:\n";
+  dq.print();
+  dq.emplace(dq.cbegin()+3,7);
+  std::cout<<"Emplace with 7:\n";
+  dq.print();
+
   return 0;
 }

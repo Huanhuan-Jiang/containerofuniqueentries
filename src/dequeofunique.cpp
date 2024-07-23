@@ -2,6 +2,7 @@
 
 #include <algorithm>  // For std::find
 #include <cassert>    // For std::assert
+#include <compare>    // For std::weak_ordering
 #include <deque>
 #include <functional>  // For std::hash
 #include <initializer_list>
@@ -311,6 +312,39 @@ class dequeofunique {
   // void shrink_to_fit();
   // End of to do list 10
 
+  // operators
+  auto operator<=>(const dequeofunique& other) const {
+    return (deque_ <=> other.deque_);
+  }
+
+  bool operator==(const dequeofunique& other) const {
+    return (deque_ == other.deque_);
+  }
+
+  bool operator!=(const dequeofunique& other) const {
+    return (deque_ != other.deque_);
+  }
+
+  bool operator<(const dequeofunique& other) const {
+    return (deque_ <=> other.deque_) == std::weak_ordering::less;
+  }
+
+  bool operator<=(const dequeofunique& other) const {
+    auto cmp = deque_ <=> other.deque_;
+    return cmp == std::weak_ordering::less ||
+           cmp == std::weak_ordering::equivalent;
+  }
+
+  bool operator>(const dequeofunique& other) const {
+    return (deque_ <=> other.deque_) == std::weak_ordering::greater;
+  }
+
+  bool operator>=(const dequeofunique& other) const {
+    auto cmp = deque_ <=> other.deque_;
+    return cmp == std::weak_ordering::greater ||
+           cmp == std::weak_ordering::equivalent;
+  }
+
   // Destructor
   ~dequeofunique() = default;
 
@@ -526,6 +560,40 @@ int main() {
   std::cout << "After swap:\n";
   dq1.print();
   dq2.print();
+
+  dq1.clear();
+  dq2.clear();
+  dq1 = containerofunique::dequeofunique<int>({1, 2, 3, 4});
+  dq2 = containerofunique::dequeofunique<int>({5, 6, 7, 8});
+  containerofunique::dequeofunique<int> dq3(dq1);
+  if (dq1 == dq3) {
+    std::cout << "dq1 is equal to dq3\n";
+  }
+  if (dq1 == dq2) {
+    std::cout << "dq1 is not equal to dq2\n";
+  }
+  if (dq1 < dq2) {
+    std::cout << "dq1 is less than dq2\n";
+  }
+  if (dq1 <= dq2) {
+    std::cout << "dq1 is less than or equal to dq2\n";
+  }
+  if (dq2 > dq1) {
+    std::cout << "dq2 is greater than dq1\n";
+  }
+  if (dq2 >= dq1) {
+    std::cout << "dq2 is greater than or equal to dq1\n";
+  }
+
+  if ((dq1 <=> dq2) == std::weak_ordering::less) {
+    std::cout << "dq1 is less than dq2.\n";
+  }
+  if ((dq2 <=> dq1) == std::weak_ordering::greater) {
+    std::cout << "dq2 is greater than dq1.\n";
+  }
+  if ((dq1 <=> dq3) == std::weak_ordering::equivalent) {
+    std::cout << "dq1 is equivalent to dq3.\n";
+  }
 
   return 0;
 }

@@ -66,22 +66,18 @@ class dequeofunique {
   explicit dequeofunique(const Allocator& alloc);  // Can be done later
   // End of to do list 5:
 
-  // To do list 1:
   template <class InputIt>
   dequeofunique(InputIt first, InputIt last,
                 const Allocator& alloc = Allocator()) {
-    push_back(first, last);
+    __push_back(first, last);
   }
 
   dequeofunique(const std::initializer_list<T>& init,
                 const Allocator& alloc = Allocator())
       : dequeofunique(init.begin(), init.end()) {}
 
-  // End of to do list 1:
-
   dequeofunique(const dequeofunique& other) = default;
 
-  // To do list 2:
   dequeofunique(const dequeofunique& other, const Allocator& alloc);
 
   dequeofunique(dequeofunique&& other) {
@@ -91,6 +87,7 @@ class dequeofunique {
 
   dequeofunique(dequeofunique&& other, const Allocator& alloc);
 
+  // To do list 2:
   // template <std::ranges::input_range R>
   // dequeofunique(std::from_range_t, R&& rg,
   //               const Allocator& alloc = Allocator());
@@ -232,29 +229,50 @@ class dequeofunique {
     set_.erase(f);
   }
 
-  template <class InputIt>
-  void push_back(InputIt first, InputIt last) {
-    while (first != last) {
-      push_back(*first++);
-    }
-  }
-
-  bool push_back(T entry) {
-    if (set_.emplace(entry).second) {
-      deque_.push_back(entry);
+  bool push_front( const T& value ){
+    if(set_.insert(value).second) {
+      deque_.push_front(value);
       return true;
     }
     return false;
   }
 
-  // To do list 8: do I need to consider the Hash of other? I don't think it
-  // makes sense to include the Hash of other since the dequeofunique is
-  // supposed to store elements with same type and Hash.
-  bool push_back(const dequeofunique<T, Hash>& other) {
-    return push_back(other.deque_);
+  bool push_front( T&& value ){
+    if(set_.insert(value).second) {
+      deque_.push_front(value);
+      return true;
+    }
+    return false;
   }
 
-  bool push_back(const std::deque<T>& other) {
+  bool push_back( const T& value ){
+    if(set_.insert(value).second) {
+      deque_.push_back(value);
+      return true;
+    }
+    return false;
+  }
+
+  bool push_back( T&& value ){
+    if(set_.insert(value).second) {
+      deque_.push_back(value);
+      return true;
+    }
+    return false;
+  }
+
+  template <class InputIt>
+  void __push_back(InputIt first, InputIt last) {
+    while (first != last) {
+      push_back(*first++);
+    }
+  }
+
+  bool __push_back(const dequeofunique<T, Hash>& other) {
+    return __push_back(other.deque_);
+  }
+
+  bool __push_back(const std::deque<T>& other) {
     bool any_added = false;
     for (const auto& entry : other) {
       auto added = push_back(entry);
@@ -353,52 +371,23 @@ int main() {
   std::cout << "Print dq_int_init5 after move:\n";
   dq_int_init5.print();
 
-  containerofunique::dequeofunique<int> dq_int_init8 = {1, 2, 3, 4, 5};
+  std::deque<int> deque_int = {1, 2, 3, 4, 5};
+  containerofunique::dequeofunique<int> dq_int_init8 (deque_int.begin(), deque_int.end());
   std::cout << "Print dq_int_init8:\n";
   dq_int_init8.print();
 
-  containerofunique::dequeofunique<int> dq_int1 = {1, 2, 3, 4};
-  std::cout << "Print dq_int:\n";
-  dq_int1.print();
-
-  std::cout << "Test element access:\n";
-  std::cout << "The first element of dq_int1: " << dq_int1.front() << ".\n";
-  std::cout << "The second element of dq_int1: " << dq_int1.at(1) << ".\n";
-  std::cout << "The third element of dq_int1: " << dq_int1[2] << ".\n";
-  std::cout << "The last element of dq_int1: " << dq_int1.back() << ".\n";
-
-  std::cout << "\n";
-  std::cout << "Test modifiers:\n";
-
-  std::cout << "\n";
-  std::cout << "Test push_back():\n";
-  std::cout << "Print dq_int_init1:\n";
-  dq_int_init1.print();
-
-  dq_int_init1.push_back(1);
-  std::cout << "Print dq_int_init1:\n";
-  dq_int_init1.print();
-
-  dq_int_init1.push_back(2);
-  std::cout << "Print dq_int_init1:\n";
-  dq_int_init1.print();
-
-  dq_int_init1.push_back(dq_int_init8);
-  std::cout << "Print dq_int_init1:\n";
-  dq_int_init1.print();
-
-  std::deque<int> dq_int = {8, 9, 2};
-  dq_int_init1.push_back(dq_int);
-  std::cout << "Print dq_int_init1:\n";
-  dq_int_init1.print();
-
-  std::cout << "Test iterators using int:\n";
-  containerofunique::dequeofunique<int> dq;
-  dq.push_back(1);
-  dq.push_back(2);
-  dq.push_back(3);
+  containerofunique::dequeofunique<int> dq = {1, 2, 3, 4};
+  std::cout << "Print dq:\n";
   dq.print();
 
+  std::cout << "Test element access:\n";
+  std::cout << "The first element of dq_int1: " << dq.front() << ".\n";
+  std::cout << "The second element of dq_int1: " << dq.at(1) << ".\n";
+  std::cout << "The third element of dq_int1: " << dq[2] << ".\n";
+  std::cout << "The last element of dq_int1: " << dq.back() << ".\n";
+
+  std::cout << "\n";
+  std::cout << "Test iterators using int:\n";
   std::cout << "The first element of dq is: " << *dq.cbegin() << ".\n";
   auto it = dq.cbegin();
   std::cout << "The second element of dq is: " << *(++it) << ".\n";
@@ -421,11 +410,17 @@ int main() {
             << ".\n";
 
   std::cout << "\nTest modifiers using int: \n";
-  dq.print();
   dq.clear();
   std::cout << "Print dq after clear: \n";
   dq.print();
-  std::cout << "\n";
+  std::cout << "\nTest push_front and push_back using int:\n";
+  dq.push_back(3);
+  int int1 = 4;
+  dq.push_back(std::move(int1));
+  dq.push_front(2);
+  int int2 = 1;
+  dq.push_front(std::move(int2));
+  dq.print();
 
   dq.clear();
   dq = containerofunique::dequeofunique<int>({1, 2, 3, 4});

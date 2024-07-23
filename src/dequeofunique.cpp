@@ -2,6 +2,7 @@
 
 #include <algorithm>  // For std::find
 #include <cassert>    // For std::assert
+#include <compare>    // For std::weak_ordering
 #include <deque>
 #include <functional>  // For std::hash
 #include <initializer_list>
@@ -29,29 +30,29 @@ class dequeofunique {
   using allocator_type = Allocator;
 
   static_assert(
-      std::is_same<typename allocator_type::value_type, value_type>::value,
+      std::is_same_v<typename allocator_type::value_type, value_type>,
       "Allocator::value_type must be same type as value_type");
 
-  using __alloc_traits = std::allocator_traits<Allocator>;
+  using AllocTraits = std::allocator_traits<Allocator>;
   using reference = value_type&;
   using const_reference = const value_type&;
-  using pointer = typename __alloc_traits::pointer;
-  using size_type = typename __alloc_traits::size_type;
-  using difference_type = typename __alloc_traits::difference_type;
+  using pointer = typename AllocTraits::pointer;
+  using size_type = typename AllocTraits::size_type;
+  using difference_type = typename AllocTraits::difference_type;
 
-  using __deque_type = std::deque<T, Allocator>;
-  using _deque_iterator = typename __deque_type::iterator;
-  using _deque_const_iterator = typename __deque_type::const_iterator;
-  using _deque_reverse_iterator = typename __deque_type::reverse_iterator;
+  using DequeType = std::deque<T, Allocator>;
+  using _deque_iterator = typename DequeType::iterator;
+  using _deque_const_iterator = typename DequeType::const_iterator;
+  using _deque_reverse_iterator = typename DequeType::reverse_iterator;
   using _deque_const_reverse_iterator =
-      typename __deque_type::const_reverse_iterator;
-  using _deque_reference = typename __deque_type::reference;
+      typename DequeType::const_reverse_iterator;
+  using _deque_reference = typename DequeType::reference;
 
-  using __unordered_set_type = std::unordered_set<T, Hash, KeyEqual, Allocator>;
-  using _unordered_set_iterator = typename __unordered_set_type::iterator;
+  using UnorderedSetType = std::unordered_set<T, Hash, KeyEqual, Allocator>;
+  using _unordered_set_iterator = typename UnorderedSetType::iterator;
   using _unordered_set_const_iterator =
-      typename __unordered_set_type::const_iterator;
-  using _set_reference = typename __unordered_set_type::reference;
+      typename UnorderedSetType::const_iterator;
+  using _set_reference = typename UnorderedSetType::reference;
 
   using iterator = _deque_iterator;
   using const_iterator = _deque_const_iterator;
@@ -63,29 +64,23 @@ class dequeofunique {
   dequeofunique() = default;
 
   // To do list 5:
-  explicit dequeofunique(const Allocator& alloc);  // Can be done later
+  // explicit dequeofunique(const Allocator& alloc);  // Can be done later
   // End of to do list 5:
 
   template <class InputIt>
-  dequeofunique(InputIt first, InputIt last,
-                const Allocator& alloc = Allocator()) {
-    __push_back(first, last);
+  dequeofunique(InputIt first, InputIt last) {
+    _push_back(first, last);
   }
 
-  dequeofunique(const std::initializer_list<T>& init,
-                const Allocator& alloc = Allocator())
+  dequeofunique(const std::initializer_list<T>& init)
       : dequeofunique(init.begin(), init.end()) {}
 
   dequeofunique(const dequeofunique& other) = default;
 
-  dequeofunique(const dequeofunique& other, const Allocator& alloc);
-
-  dequeofunique(dequeofunique&& other) {
+  dequeofunique(dequeofunique&& other) noexcept {
     std::swap(deque_, other.deque_);
     std::swap(set_, other.set_);
   };
-
-  dequeofunique(dequeofunique&& other, const Allocator& alloc);
 
   // To do list 2:
   // template <std::ranges::input_range R>
@@ -136,7 +131,7 @@ class dequeofunique {
   }
 
   const_iterator erase(const_iterator first, const_iterator last) {
-    for (const_iterator it = first; it != last; ++it) {
+    for (auto it = first; it != last; ++it) {
       set_.erase(*it);
     }
     return deque_.erase(first, last);
@@ -162,7 +157,7 @@ class dequeofunique {
     bool any_added = false;
     int num_inserted = 0;
     auto return_it = pos;
-    for (const_iterator it = first; it != last; ++it) {
+    for (auto it = first; it != last; ++it) {
       auto added = set_.insert(*it).second;
       if (added) {
         auto tmp_it = deque_.insert(pos, *it);
@@ -239,8 +234,9 @@ class dequeofunique {
   }
 
   bool push_front(T&& value) {
-    if (set_.insert(value).second) {
-      deque_.push_front(value);
+    auto temp = std::move(value); 
+    if (set_.insert(temp).second) {
+      deque_.push_front(std::move(temp));
       return true;
     }
     return false;
@@ -255,25 +251,26 @@ class dequeofunique {
   }
 
   bool push_back(T&& value) {
-    if (set_.insert(value).second) {
-      deque_.push_back(value);
+    auto temp = std::move(value);
+    if (set_.insert(temp).second) {
+      deque_.push_back(std::move(temp));
       return true;
     }
     return false;
   }
 
   template <class InputIt>
-  void __push_back(InputIt first, InputIt last) {
+  void _push_back(InputIt first, InputIt last) {
     while (first != last) {
       push_back(*first++);
     }
   }
 
-  bool __push_back(const dequeofunique<T, Hash>& other) {
-    return __push_back(other.deque_);
+  bool _push_back(const dequeofunique<T, Hash>& other) {
+    return _push_back(other.deque_);
   }
 
-  bool __push_back(const std::deque<T>& other) {
+  bool _push_back(const std::deque<T>& other) {
     bool any_added = false;
     for (const auto& entry : other) {
       auto added = push_back(entry);
@@ -298,7 +295,7 @@ class dequeofunique {
 
   // Capacity
   bool empty() const noexcept {
-    if (deque_.size() == 0) {
+    if (deque_.empty()) {
       return true;
     }
     return false;
@@ -311,12 +308,45 @@ class dequeofunique {
   // void shrink_to_fit();
   // End of to do list 10
 
+  // operators
+  auto operator<=>(const dequeofunique& other) const {
+    return (deque_ <=> other.deque_);
+  }
+
+  bool operator==(const dequeofunique& other) const {
+    return (deque_ == other.deque_);
+  }
+
+  bool operator!=(const dequeofunique& other) const {
+    return (deque_ != other.deque_);
+  }
+
+  bool operator<(const dequeofunique& other) const {
+    return (deque_ <=> other.deque_) == std::weak_ordering::less;
+  }
+
+  bool operator<=(const dequeofunique& other) const {
+    auto cmp = deque_ <=> other.deque_;
+    return cmp == std::weak_ordering::less ||
+           cmp == std::weak_ordering::equivalent;
+  }
+
+  bool operator>(const dequeofunique& other) const {
+    return (deque_ <=> other.deque_) == std::weak_ordering::greater;
+  }
+
+  bool operator>=(const dequeofunique& other) const {
+    auto cmp = deque_ <=> other.deque_;
+    return cmp == std::weak_ordering::greater ||
+           cmp == std::weak_ordering::equivalent;
+  }
+
   // Destructor
   ~dequeofunique() = default;
 
   // Get member variables
-  __deque_type deque() { return deque_; }
-  __unordered_set_type set() { return set_; }
+  DequeType deque() { return deque_; }
+  UnorderedSetType set() { return set_; }
 
   void print() const {
     std::cout << "Print out the dequeofunique.\n";
@@ -339,15 +369,15 @@ class dequeofunique {
   }
 
  private:
-  __deque_type deque_;
-  __unordered_set_type set_;
+  DequeType deque_;
+  UnorderedSetType set_;
 };  // class dequeofunique
 }  // namespace containerofunique
 
-int main() {
+int main() noexcept {
   std::cout << "Test constructors and operator '=' using int:\n";
   containerofunique::dequeofunique<int> dq_int_empty;
-  if (dq_int_empty.size() == 0) {
+  if (dq_int_empty.empty() == false) {
     std::cout << "dq_int_empty is empty.\n";
     std::cout << "Print dq_int_empty:\n";
     dq_int_empty.print();
@@ -372,8 +402,6 @@ int main() {
   containerofunique::dequeofunique<int> dq_int_init5(std::move(dq_int_init3));
   std::cout << "Print dq_int_init5:\n";
   dq_int_init5.print();
-  std::cout << "Print dq_int_init3 after move:\n";
-  dq_int_init3.print();
 
   containerofunique::dequeofunique<int> dq_int_init6 = dq_int_init5;
   std::cout << "Print dq_int_init6:\n";
@@ -382,8 +410,6 @@ int main() {
   containerofunique::dequeofunique<int> dq_int_init7 = std::move(dq_int_init5);
   std::cout << "Print dq_int_init7:\n";
   dq_int_init7.print();
-  std::cout << "Print dq_int_init5 after move:\n";
-  dq_int_init5.print();
 
   std::deque<int> deque_int = {1, 2, 3, 4, 5};
   containerofunique::dequeofunique<int> dq_int_init8(deque_int.begin(),
@@ -526,6 +552,40 @@ int main() {
   std::cout << "After swap:\n";
   dq1.print();
   dq2.print();
+
+  dq1.clear();
+  dq2.clear();
+  dq1 = containerofunique::dequeofunique<int>({1, 2, 3, 4});
+  dq2 = containerofunique::dequeofunique<int>({5, 6, 7, 8});
+  containerofunique::dequeofunique<int> dq3(dq1);
+  if (dq1 == dq3) {
+    std::cout << "dq1 is equal to dq3\n";
+  }
+  if (dq1 == dq2) {
+    std::cout << "dq1 is not equal to dq2\n";
+  }
+  if (dq1 < dq2) {
+    std::cout << "dq1 is less than dq2\n";
+  }
+  if (dq1 <= dq2) {
+    std::cout << "dq1 is less than or equal to dq2\n";
+  }
+  if (dq2 > dq1) {
+    std::cout << "dq2 is greater than dq1\n";
+  }
+  if (dq2 >= dq1) {
+    std::cout << "dq2 is greater than or equal to dq1\n";
+  }
+
+  if ((dq1 <=> dq2) == std::weak_ordering::less) {
+    std::cout << "dq1 is less than dq2.\n";
+  }
+  if ((dq2 <=> dq1) == std::weak_ordering::greater) {
+    std::cout << "dq2 is greater than dq1.\n";
+  }
+  if ((dq1 <=> dq3) == std::weak_ordering::equivalent) {
+    std::cout << "dq1 is equivalent to dq3.\n";
+  }
 
   return 0;
 }

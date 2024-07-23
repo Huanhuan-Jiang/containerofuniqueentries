@@ -21,17 +21,20 @@ jobs:
       
       - name: Install Clang-Tidy
         run: sudo apt-get update && sudo apt-get install -y clang-tidy bear
+      
+      - name: Print compiler version
+        run: |
+          g++ --version
+          clang --version
 
-      - name: Build with Bear
+      - name: Build and run tests
         run: |
-          mkdir build
-          cd build
-          bear -- make 
-          
-      - name: Run clang-tidy
-        run: |
-          cd build
+          mkdir src/build
+          cd src/build
+          cmake ..
+          make
+          ctest --output-on-failure
           find ../ \( -name '*.cpp' -o -name '*.h' \) \
           -not \( -path '*/build/*' -o -path '*/thirdparty/*' \) \
-          -exec clang-tidy -p=. --config-file=../.clang-tidy -extra-arg=-Wunused-variable {} + \
+          -exec clang-tidy -p=. --config-file=../../.clang-tidy -extra-arg=-Wunused-variable {} + \
           -print | grep "warning" && exit 1 || exit 0

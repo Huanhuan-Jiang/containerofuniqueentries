@@ -46,6 +46,7 @@ Checks: '
   performance-*,
   -performance-noexcept-move-constructor,
   -performance-unnecessary-value-param,
+  -performance-move-const-arg,
   readability-container-size-empty,
   readability-braces-around-statements,
   readability-else-after-return,

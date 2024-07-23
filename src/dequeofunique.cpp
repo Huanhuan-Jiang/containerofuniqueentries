@@ -1,21 +1,21 @@
 // #pragma once
 
+#include <algorithm>  // For std::find
+#include <cassert>    // For std::assert
 #include <deque>
-#include <unordered_set>
 #include <functional>  // For std::hash
 #include <initializer_list>
 #include <iostream>
 #include <memory>       // For std::allocator
+#include <optional>     // For std::nullopt
 #include <ranges>       // For ranges
 #include <type_traits>  // For std::is_same
-#include <algorithm>    // For std::find
-#include <cassert>      // For std::assert
-#include <optional>     // For std::nullopt
+#include <unordered_set>
 
 namespace containerofunique {
 
 template <class T, class Hash = std::hash<T>, class KeyEqual = std::equal_to<T>,
-          class Allocator = std::allocator<T> >
+          class Allocator = std::allocator<T>>
 // To do list 3: is it necessary to have _Pred and _Alloc?
 // Do not use _Pred and _Alloc for now and only focus on dequeofuniqueints for
 // now
@@ -192,29 +192,30 @@ class dequeofunique {
     }
     return (std::make_pair(return_it, any_added));
   }
-  
-  template< class... Args >
-  std::pair<const_iterator, bool> emplace( const_iterator pos, Args&&... args ){
-    if(set_.emplace(std::forward<Args>(args)...).second) { 
-      return(std::make_pair(deque_.emplace(pos, std::forward<Args>(args)...), true)); 
-      }
-      return(std::make_pair(pos, false)); 
+
+  template <class... Args>
+  std::pair<const_iterator, bool> emplace(const_iterator pos, Args&&... args) {
+    if (set_.emplace(std::forward<Args>(args)...).second) {
+      return (std::make_pair(deque_.emplace(pos, std::forward<Args>(args)...),
+                             true));
+    }
+    return (std::make_pair(pos, false));
   }
 
-  template< class... Args >
-  std::optional<std::reference_wrapper<T>> emplace_front( Args&&... args ){
-    if(set_.emplace(std::forward<Args>(args)...).second) { 
-      return deque_.emplace_front(std::forward<Args>(args)...); 
-      }
-      return std::nullopt; 
+  template <class... Args>
+  std::optional<std::reference_wrapper<T>> emplace_front(Args&&... args) {
+    if (set_.emplace(std::forward<Args>(args)...).second) {
+      return deque_.emplace_front(std::forward<Args>(args)...);
+    }
+    return std::nullopt;
   }
 
-  template< class... Args >
-  std::optional<std::reference_wrapper<T>> emplace_back( Args&&... args ){
-    if(set_.emplace(std::forward<Args>(args)...).second) { 
-      return deque_.emplace_back(std::forward<Args>(args)...); 
-      }
-      return std::nullopt; 
+  template <class... Args>
+  std::optional<std::reference_wrapper<T>> emplace_back(Args&&... args) {
+    if (set_.emplace(std::forward<Args>(args)...).second) {
+      return deque_.emplace_back(std::forward<Args>(args)...);
+    }
+    return std::nullopt;
   }
 
   void pop_front() {
@@ -229,32 +230,32 @@ class dequeofunique {
     set_.erase(f);
   }
 
-  bool push_front( const T& value ){
-    if(set_.insert(value).second) {
+  bool push_front(const T& value) {
+    if (set_.insert(value).second) {
       deque_.push_front(value);
       return true;
     }
     return false;
   }
 
-  bool push_front( T&& value ){
-    if(set_.insert(value).second) {
+  bool push_front(T&& value) {
+    if (set_.insert(value).second) {
       deque_.push_front(value);
       return true;
     }
     return false;
   }
 
-  bool push_back( const T& value ){
-    if(set_.insert(value).second) {
+  bool push_back(const T& value) {
+    if (set_.insert(value).second) {
       deque_.push_back(value);
       return true;
     }
     return false;
   }
 
-  bool push_back( T&& value ){
-    if(set_.insert(value).second) {
+  bool push_back(T&& value) {
+    if (set_.insert(value).second) {
       deque_.push_back(value);
       return true;
     }
@@ -281,6 +282,20 @@ class dequeofunique {
     return any_added;
   }
 
+  // template< container-compatible-range<T> R >
+  // void append_range( R&& rg );
+
+  // void resize( size_type count );
+  // void resize( size_type count, const value_type& value );
+
+  // template< container-compatible-range<T> R >
+  // void prepend_range( R&& rg );
+
+  void swap(dequeofunique& other) noexcept {
+    deque_.swap(other.deque_);
+    set_.swap(other.set_);
+  };
+
   // Capacity
   bool empty() const noexcept {
     if (deque_.size() == 0) {
@@ -299,9 +314,8 @@ class dequeofunique {
   // Destructor
   ~dequeofunique() = default;
 
-  //
+  // Get member variables
   __deque_type deque() { return deque_; }
-
   __unordered_set_type set() { return set_; }
 
   void print() const {
@@ -372,7 +386,8 @@ int main() {
   dq_int_init5.print();
 
   std::deque<int> deque_int = {1, 2, 3, 4, 5};
-  containerofunique::dequeofunique<int> dq_int_init8 (deque_int.begin(), deque_int.end());
+  containerofunique::dequeofunique<int> dq_int_init8(deque_int.begin(),
+                                                     deque_int.end());
   std::cout << "Print dq_int_init8:\n";
   dq_int_init8.print();
 
@@ -433,7 +448,8 @@ int main() {
 
   dq.clear();
   dq = containerofunique::dequeofunique<int>({1, 2, 3, 4});
-  std::cout << "Print dq after erase one element:" <<  *dq.erase(dq.cbegin()) << "\n";
+  std::cout << "Print dq after erase one element:" << *dq.erase(dq.cbegin())
+            << "\n";
   dq.print();
   dq.erase(dq.cbegin(), dq.cbegin() + 2);
   std::cout << "Print dq after erase a range of elements: \n";
@@ -476,30 +492,40 @@ int main() {
 
   dq.clear();
   dq = containerofunique::dequeofunique<int>({1, 2, 3, 4});
-  dq.emplace(dq.cbegin()+2, 2);
-  std::cout<<"Emplace with 2:\n";
+  dq.emplace(dq.cbegin() + 2, 2);
+  std::cout << "Emplace with 2:\n";
   dq.print();
-  dq.emplace(dq.cbegin()+3,7);
-  std::cout<<"Emplace with 7:\n";
+  dq.emplace(dq.cbegin() + 3, 7);
+  std::cout << "Emplace with 7:\n";
   dq.print();
 
   dq.clear();
   dq = containerofunique::dequeofunique<int>({1, 2, 3, 4});
   dq.emplace_back(2);
-  std::cout<<"Emplace_back with 2:\n";
+  std::cout << "Emplace_back with 2:\n";
   dq.print();
   dq.emplace_back(7);
-  std::cout<<"Emplace_back with 7:\n";
+  std::cout << "Emplace_back with 7:\n";
   dq.print();
 
   dq.clear();
   dq = containerofunique::dequeofunique<int>({1, 2, 3, 4});
   dq.emplace_front(2);
-  std::cout<<"Emplace_front with 2:\n";
+  std::cout << "Emplace_front with 2:\n";
   dq.print();
   dq.emplace_front(7);
-  std::cout<<"Emplace_front with 7:\n";
+  std::cout << "Emplace_front with 7:\n";
   dq.print();
+
+  containerofunique::dequeofunique<int> dq1({1, 2, 3, 4});
+  containerofunique::dequeofunique<int> dq2({5, 6, 7, 8});
+  std::cout << "Before swap:\n";
+  dq1.print();
+  dq2.print();
+  dq1.swap(dq2);
+  std::cout << "After swap:\n";
+  dq1.print();
+  dq2.print();
 
   return 0;
 }

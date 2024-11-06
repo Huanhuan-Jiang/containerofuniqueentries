@@ -3,3 +3,4 @@
 build/
 output.pdf
 --color
+format_changes.log

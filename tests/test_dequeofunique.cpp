@@ -124,25 +124,88 @@ TEST(DequeOfUniqueTest, Iterators) {
   EXPECT_EQ(*dou.crbegin(), 4);
   EXPECT_EQ(*--dou.crend(), 1);
 
-  EXPECT_TRUE(std::is_const<typename std::remove_reference<decltype(*dou.cbegin())>::type>::value);
-  EXPECT_TRUE(std::is_const<typename std::remove_reference<decltype(*dou.cend())>::type>::value);
-  EXPECT_TRUE(std::is_const<typename std::remove_reference<decltype(*dou.crbegin())>::type>::value);
-  EXPECT_TRUE(std::is_const<typename std::remove_reference<decltype(*dou.crend())>::type>::value);
+  EXPECT_TRUE(std::is_const<typename std::remove_reference<
+                  decltype(*dou.cbegin())>::type>::value);
+  EXPECT_TRUE(
+      std::is_const<
+          typename std::remove_reference<decltype(*dou.cend())>::type>::value);
+  EXPECT_TRUE(std::is_const<typename std::remove_reference<
+                  decltype(*dou.crbegin())>::type>::value);
+  EXPECT_TRUE(
+      std::is_const<
+          typename std::remove_reference<decltype(*dou.crend())>::type>::value);
 }
 
 TEST(DequeOfUniqueTest, ClearAndErase) {
   containerofunique::deque_of_unique<int> dou1 = {1, 2, 3, 4, 5, 6};
   std::deque<int> dq1 = {2, 3, 4, 5, 6};
   std::unordered_set<int> set1 = {2, 3, 4, 5, 6};
-  
+
   *dou1.erase(dou1.cbegin());
   EXPECT_EQ(dou1.deque(), dq1);
   EXPECT_THAT(dou1.set(), ::testing::UnorderedElementsAreArray(set1));
-  
+
   std::deque<int> dq2 = {4, 5, 6};
   std::unordered_set<int> set2 = {4, 5, 6};
 
   dou1.erase(dou1.cbegin(), dou1.cbegin() + 2);
   EXPECT_EQ(dou1.deque(), dq2);
   EXPECT_THAT(dou1.set(), ::testing::UnorderedElementsAreArray(set2));
+}
+
+TEST(DequeOfUniqueTest, Insert) {
+  containerofunique::deque_of_unique<int> dou1 = {1};
+  std::deque<int> dq1 = {1};
+  auto result1 = dou1.insert(dou1.cbegin(), 2);
+  auto expected_result1 = dq1.insert(dq1.cbegin(), 2);
+  EXPECT_EQ(*result1.first, *expected_result1);
+  EXPECT_TRUE(result1.second);
+
+  containerofunique::deque_of_unique<int> dou2 = {1};
+  std::deque<int> dq2 = {1, 2};
+  auto result2 = dou2.insert(dou2.cbegin(), 1);
+  EXPECT_EQ(*result2.first, *dou2.cbegin());
+  EXPECT_FALSE(result2.second);
+
+  containerofunique::deque_of_unique<std::string> dou3 = {"hello", "world"};
+  std::deque<std::string> dq3 = {"hello", "world"};
+  std::string str1 = "good";
+  auto expected_result3 = dq3.insert(dq3.cbegin(), std::move("good"));
+  auto result3 = dou3.insert(dou3.cbegin(), std::move(str1));
+  EXPECT_EQ(dou3.deque(), (std::deque<std::string> {"good", "hello", "world"}));
+  EXPECT_EQ(*result3.first, *expected_result3);
+  EXPECT_TRUE(result3.second);
+
+  containerofunique::deque_of_unique<std::string> dou4 = {"hello", "world"};
+  std::deque<std::string> dq4 = {"hello", "world"};
+  std::string str2 = "hello";
+  auto expected_result4 = dq4;
+  auto result4 = dou4.insert(dou4.cbegin(), std::move(str2));
+  EXPECT_EQ(dou4.deque(), dq4);
+  EXPECT_EQ(*result4.first, *dou4.cbegin());
+  EXPECT_FALSE(result4.second);
+
+  containerofunique::deque_of_unique<std::string> dou5_1 = {"hello", "world"};
+  containerofunique::deque_of_unique<std::string> dou5_2 = {"good", "morning"};
+  containerofunique::deque_of_unique<std::string> dou5_3 = {"hello", "world"};
+  std::deque<std::string> dq5 = {"good", "morning", "hello", "world"};
+  auto expected_result5 = dq5;
+  auto result5_1 =
+      dou5_1.insert(dou5_1.cbegin(), dou5_2.cbegin(), dou5_2.cbegin() + 2);
+  EXPECT_EQ(dou5_1.deque(), dq5);
+  EXPECT_EQ(*result5_1, *(dou5_1.cbegin()+1));
+  auto result5_2 =
+      dou5_1.insert(dou5_1.cbegin(), dou5_3.cbegin(), dou5_3.cbegin() + 2);
+  EXPECT_EQ(dou5_1.deque(), dq5);
+  EXPECT_EQ(*result5_2, *(dou5_1.cbegin()));
+
+  containerofunique::deque_of_unique<std::string> dou6 = {"hello", "world"};
+  std::deque<std::string> dq6 = {"good", "morning", "hello", "world"};
+  auto expected_result6 = dq6;
+  auto result6_1 = dou6.insert(dou6.cbegin(), {"good", "morning"});
+  EXPECT_EQ(dou6.deque(), dq6);
+  EXPECT_EQ(*result6_1, *(dou6.cbegin()+1));
+  auto result6_2 = dou6.insert(dou6.cbegin(), {"good", "morning"});
+  EXPECT_EQ(dou6.deque(), dq6);
+  EXPECT_EQ(*result6_2, *dou6.cbegin());
 }

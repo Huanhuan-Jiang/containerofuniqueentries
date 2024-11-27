@@ -116,3 +116,16 @@ TEST(DequeOfUniqueTest, ElementAccess) {
   EXPECT_EQ(dou[2], 3);
   EXPECT_EQ(dou.back(), 4);
 }
+
+TEST(DequeOfUniqueTest, Iterators) {
+  containerofunique::deque_of_unique<int> dou = {1, 2, 3, 4};
+  EXPECT_EQ(*dou.cbegin(), 1);
+  EXPECT_EQ(*--dou.cend(), 4);
+  EXPECT_EQ(*dou.crbegin(), 4);
+  EXPECT_EQ(*--dou.crend(), 1);
+
+  EXPECT_TRUE(std::is_const<typename std::remove_reference<decltype(*dou.cbegin())>::type>::value);
+  EXPECT_TRUE(std::is_const<typename std::remove_reference<decltype(*dou.cend())>::type>::value);
+  EXPECT_TRUE(std::is_const<typename std::remove_reference<decltype(*dou.crbegin())>::type>::value);
+  EXPECT_TRUE(std::is_const<typename std::remove_reference<decltype(*dou.crend())>::type>::value);
+}

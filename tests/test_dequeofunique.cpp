@@ -102,5 +102,9 @@ TEST(DequeOfUniqueTest, MoveAssignmentOperator) {
 }
 
 TEST(DequeOfUniqueTest,InitializerListAssignmentOperator) {
-  
+  containerofunique::deque_of_unique<int> dou = {1, 2, 3, 4};
+  std::deque<int> dq = {1, 2, 3, 4};
+  EXPECT_EQ(dou.deque(), dq);
+  EXPECT_THAT(std::deque<int>(dou.set().begin(), dou.set().end()),
+              ::testing::UnorderedElementsAreArray(dq));
 }

@@ -129,3 +129,20 @@ TEST(DequeOfUniqueTest, Iterators) {
   EXPECT_TRUE(std::is_const<typename std::remove_reference<decltype(*dou.crbegin())>::type>::value);
   EXPECT_TRUE(std::is_const<typename std::remove_reference<decltype(*dou.crend())>::type>::value);
 }
+
+TEST(DequeOfUniqueTest, ClearAndErase) {
+  containerofunique::deque_of_unique<int> dou1 = {1, 2, 3, 4, 5, 6};
+  std::deque<int> dq1 = {2, 3, 4, 5, 6};
+  std::unordered_set<int> set1 = {2, 3, 4, 5, 6};
+  
+  *dou1.erase(dou1.cbegin());
+  EXPECT_EQ(dou1.deque(), dq1);
+  EXPECT_THAT(dou1.set(), ::testing::UnorderedElementsAreArray(set1));
+  
+  std::deque<int> dq2 = {4, 5, 6};
+  std::unordered_set<int> set2 = {4, 5, 6};
+
+  dou1.erase(dou1.cbegin(), dou1.cbegin() + 2);
+  EXPECT_EQ(dou1.deque(), dq2);
+  EXPECT_THAT(dou1.set(), ::testing::UnorderedElementsAreArray(set2));
+}

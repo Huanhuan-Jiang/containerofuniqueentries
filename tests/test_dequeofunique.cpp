@@ -201,7 +201,6 @@ TEST(DequeOfUniqueTest, Insert) {
 
   containerofunique::deque_of_unique<std::string> dou6 = {"hello", "world"};
   std::deque<std::string> dq6 = {"good", "morning", "hello", "world"};
-  auto expected_result6 = dq6;
   auto result6_1 = dou6.insert(dou6.cbegin(), {"good", "morning"});
   EXPECT_EQ(dou6.deque(), dq6);
   EXPECT_EQ(*result6_1, *(dou6.cbegin()+1));
@@ -209,3 +208,52 @@ TEST(DequeOfUniqueTest, Insert) {
   EXPECT_EQ(dou6.deque(), dq6);
   EXPECT_EQ(*result6_2, *dou6.cbegin());
 }
+
+TEST(DequeOfUniqueTest, Emplace) {
+  // Emplace "good" at the begining
+  containerofunique::deque_of_unique<std::string> dou1 = {"hello", "world"};
+  std::deque<std::string> dq1 = {"hello", "world"};
+  auto result1_1 = dou1.emplace(dou1.cbegin(), "good");
+  dq1.emplace(dq1.begin(), "good");
+  EXPECT_EQ(dou1.deque(), dq1);
+  EXPECT_EQ(*result1_1.first, *dou1.cbegin());
+  EXPECT_TRUE(result1_1.second);
+
+  // Emplace "morning" in the middle
+  // Now dou1.deque() =dq1 = {"good", "hello", "world"}
+  auto result1_2 = dou1.emplace(dou1.cbegin()+1, "morning");
+  dq1.emplace(dq1.begin()+1, "morning");
+  EXPECT_EQ(dou1.deque(), dq1);
+  EXPECT_EQ(*result1_2.first, *(dou1.cbegin()+1));
+  EXPECT_TRUE(result1_2.second);
+
+  // Emplace "good" at the begining
+  auto result1_3 = dou1.emplace(dou1.cbegin()+1, "good");
+  EXPECT_EQ(dou1.deque(), dq1);
+  EXPECT_EQ(*result1_3.first, *(dou1.cbegin()+1));
+  EXPECT_FALSE(result1_3.second);
+
+  // Emplace "good" in the middle
+  auto result1_4 = dou1.emplace(dou1.cbegin()+1, "good");
+  EXPECT_EQ(dou1.deque(), dq1);
+  EXPECT_EQ(*result1_4.first, *(dou1.cbegin()+1));
+  EXPECT_FALSE(result1_4.second);
+
+  // Emplace rvalue "good" at the begining
+  containerofunique::deque_of_unique<std::string> dou2 = {"hello", "world"};
+  std::deque<std::string> dq2 = {"hello", "world"};
+  std::string str1 = "good";
+  auto result2_1 = dou2.emplace(dou2.cbegin(), std::move(str1));
+  dq2.emplace(dq2.begin(), "good");
+  EXPECT_EQ(dou2.deque(), dq2);
+  EXPECT_EQ(*result2_1.first, *dou2.cbegin());
+  EXPECT_TRUE(result2_1.second);
+
+  // Emplace rvalue "good" in the middle
+  std::string str2 = "good";
+  auto result2_2 = dou2.emplace(dou2.cbegin(), std::move(str2));
+  EXPECT_EQ(dou2.deque(), dq2);
+  EXPECT_EQ(*result2_2.first, *dou2.cbegin());
+  EXPECT_FALSE(result2_2.second);
+}
+

@@ -257,3 +257,33 @@ TEST(DequeOfUniqueTest, Emplace) {
   EXPECT_FALSE(result2_2.second);
 }
 
+TEST(DequeOfUniqueTest, EmplaceFront) {
+  // Emplace_front "good" to dou1
+  containerofunique::deque_of_unique<std::string> dou1 = {"hello", "world"};
+  std::deque<std::string> dq1 = {"hello", "world"};
+  auto result1_1 = dou1.emplace_front("good");
+  dq1.emplace_front("good");
+  EXPECT_EQ(*dou1.cbegin(), "good");
+  EXPECT_EQ(result1_1.value().get(), "good");
+
+  // Emplace_front "good" to dou1 again
+  auto result1_2 = dou1.emplace_front("good");
+  EXPECT_EQ(*dou1.cbegin(), "good");
+  EXPECT_EQ(result1_2, std::nullopt);
+
+
+  // Emplace_front rvalue "good" to dou2
+  containerofunique::deque_of_unique<std::string> dou2 = {"hello", "world"};
+  std::deque<std::string> dq2 = {"hello", "world"};
+  std::string str1 = "good";
+  auto result2_1 = dou2.emplace_front(std::move(str1));
+  dq2.emplace_front("good");
+  EXPECT_EQ(*dou2.cbegin(), "good");
+  EXPECT_EQ(result2_1.value().get(), "good");
+
+    // Emplace_front rvalue "good" to dou2 again
+  std::string str2 = "good";
+  auto result2_2 = dou2.emplace_front(std::move(str2));
+  EXPECT_EQ(*dou2.cbegin(), "good");
+  EXPECT_EQ(result2_2, std::nullopt);
+}

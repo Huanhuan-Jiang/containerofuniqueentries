@@ -29,12 +29,12 @@ jobs:
 
       - name: Build and run tests
         run: |
-          mkdir src/build
-          cd src/build
+          mkdir build
+          cd build
           cmake ..
           make
           ctest --output-on-failure
           find ../ \( -name '*.cpp' -o -name '*.h' \) \
           -not \( -path '*/build/*' -o -path '*/thirdparty/*' \) \
-          -exec clang-tidy -p=. --config-file=../../.clang-tidy -extra-arg=-Wunused-variable {} + \
+          -exec clang-tidy -p=. --config-file=../.clang-tidy -extra-arg=-Wunused-variable {} + \
           -print | grep "warning" && exit 1 || exit 0

@@ -374,3 +374,12 @@ TEST(DequeOfUniqueTest, Swap) {
   EXPECT_EQ(dou2.deque(), dq1);
   EXPECT_THAT(dou2.set(), ::testing::UnorderedElementsAreArray(dq1));
 }
+
+TEST(DequeOfUniqueTest, Empty) {
+  containerofunique::deque_of_unique<std::string> dou1;
+  EXPECT_TRUE(dou1.empty());
+  containerofunique::deque_of_unique<std::string> dou2 = {"good"};
+  EXPECT_FALSE(dou2.empty());
+  containerofunique::deque_of_unique<std::string> dou3 = {"good", "morning", "hello", "world"};
+  EXPECT_FALSE(dou3.empty());
+}

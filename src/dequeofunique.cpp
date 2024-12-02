@@ -45,7 +45,7 @@ class deque_of_unique {
   deque_of_unique(const std::initializer_list<T>& init)
       : deque_of_unique(init.begin(), init.end()) {}
 
-  deque_of_unique(const deque_of_unique& other) { _push_back(other); }
+  deque_of_unique(const deque_of_unique& other) = default;
 
   deque_of_unique(deque_of_unique&& other) noexcept {
     std::swap(deque_, other.deque_);
@@ -197,10 +197,6 @@ class deque_of_unique {
     while (first != last) {
       push_back(*first++);
     }
-  }
-
-  bool _push_back(const deque_of_unique<T, Hash>& other) {
-    return _push_back(other.deque_);
   }
 
   bool _push_back(const std::deque<T>& other) {

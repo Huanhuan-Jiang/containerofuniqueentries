@@ -1,14 +1,17 @@
 // #pragma once
 
-#include <algorithm>  // For for_each
-#include <compare>    // For std::weak_ordering
+// clang-format off
 #include <deque>
 #include <functional>  // For std::hash
 #include <initializer_list>
-#include <iostream>
 #include <optional>  // For std::nullopt
 #include <unordered_set>
 #include <utility>  // For std::swap
+
+#include <algorithm>  // For for_each
+#include <compare>    // For std::weak_ordering
+#include <iostream>
+// clang-format on
 
 namespace containerofunique {
 

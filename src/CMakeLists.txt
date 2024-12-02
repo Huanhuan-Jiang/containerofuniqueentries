@@ -1,6 +1,6 @@
 set(LIBRARY_NAME containerofunique)
 
-set(SOURCE_FILES dequeofunique.h)
+set(SOURCE_FILES dequeofunique.cpp dequeofunique.h)
 
 add_library(${LIBRARY_NAME} ${SOURCE_FILES})
 

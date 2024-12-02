@@ -346,3 +346,18 @@ TEST(DequeOfUniqueTest, PushFront) {
   EXPECT_EQ(dou2.deque(), dq2);
   EXPECT_THAT(dou2.set(), ::testing::UnorderedElementsAreArray(dq2));
 }
+
+TEST(DequeOfUniqueTest, PushBack) {
+  containerofunique::deque_of_unique<std::string> dou1 = {"hello", "world"};
+  std::deque<std::string> dq1 = {"hello", "world", "good"};
+  dou1.push_back("good");
+  EXPECT_EQ(dou1.deque(), dq1);
+  EXPECT_THAT(dou1.set(), ::testing::UnorderedElementsAreArray(dq1));
+
+  containerofunique::deque_of_unique<std::string> dou2 = {"hello", "world"};
+  std::deque<std::string> dq2 = {"hello", "world", "good"};
+  std::string str2 = "good";
+  dou2.push_back(std::move(str2));
+  EXPECT_EQ(dou2.deque(), dq2);
+  EXPECT_THAT(dou2.set(), ::testing::UnorderedElementsAreArray(dq2));
+}

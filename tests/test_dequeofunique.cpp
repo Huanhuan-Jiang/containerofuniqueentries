@@ -383,3 +383,10 @@ TEST(DequeOfUniqueTest, Empty) {
   containerofunique::deque_of_unique<std::string> dou3 = {"good", "morning", "hello", "world"};
   EXPECT_FALSE(dou3.empty());
 }
+
+TEST(DequeOfUniqueTest, Size) {
+  containerofunique::deque_of_unique<std::string> dou1 = {"good"};
+  EXPECT_EQ(dou1.size(), 1);
+  containerofunique::deque_of_unique<std::string> dou2 = {"good", "morning", "hello", "world"};
+  EXPECT_EQ(dou2.size(), 4);
+}

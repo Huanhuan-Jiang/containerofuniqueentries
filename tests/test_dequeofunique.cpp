@@ -390,3 +390,14 @@ TEST(DequeOfUniqueTest, Size) {
   containerofunique::deque_of_unique<std::string> dou2 = {"good", "morning", "hello", "world"};
   EXPECT_EQ(dou2.size(), 4);
 }
+
+TEST(DequeOfUniqueTest, Operator) {
+  containerofunique::deque_of_unique<std::string> dou1_1 = {"good"};
+  containerofunique::deque_of_unique<std::string> dou1_2 = {"good"};
+  containerofunique::deque_of_unique<std::string> dou2 = {"good", "morning", "hello", "world"};
+  containerofunique::deque_of_unique<std::string> dou3 = {"flower", "apple", "fruit"};
+
+  EXPECT_EQ(dou1_1 <=> dou1_2, std::strong_ordering::equal);
+  EXPECT_EQ(dou1_1 <=> dou2, std::weak_ordering::less);
+  EXPECT_EQ(dou1_1 <=> dou3, std::weak_ordering::greater);
+}

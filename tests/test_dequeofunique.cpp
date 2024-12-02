@@ -380,22 +380,26 @@ TEST(DequeOfUniqueTest, Empty) {
   EXPECT_TRUE(dou1.empty());
   containerofunique::deque_of_unique<std::string> dou2 = {"good"};
   EXPECT_FALSE(dou2.empty());
-  containerofunique::deque_of_unique<std::string> dou3 = {"good", "morning", "hello", "world"};
+  containerofunique::deque_of_unique<std::string> dou3 = {"good", "morning",
+                                                          "hello", "world"};
   EXPECT_FALSE(dou3.empty());
 }
 
 TEST(DequeOfUniqueTest, Size) {
   containerofunique::deque_of_unique<std::string> dou1 = {"good"};
   EXPECT_EQ(dou1.size(), 1);
-  containerofunique::deque_of_unique<std::string> dou2 = {"good", "morning", "hello", "world"};
+  containerofunique::deque_of_unique<std::string> dou2 = {"good", "morning",
+                                                          "hello", "world"};
   EXPECT_EQ(dou2.size(), 4);
 }
 
 TEST(DequeOfUniqueTest, Operator) {
   containerofunique::deque_of_unique<std::string> dou1_1 = {"good"};
   containerofunique::deque_of_unique<std::string> dou1_2 = {"good"};
-  containerofunique::deque_of_unique<std::string> dou2 = {"good", "morning", "hello", "world"};
-  containerofunique::deque_of_unique<std::string> dou3 = {"flower", "apple", "fruit"};
+  containerofunique::deque_of_unique<std::string> dou2 = {"good", "morning",
+                                                          "hello", "world"};
+  containerofunique::deque_of_unique<std::string> dou3 = {"flower", "apple",
+                                                          "fruit"};
 
   EXPECT_EQ(dou1_1 <=> dou1_2, std::strong_ordering::equal);
   EXPECT_EQ(dou1_1 <=> dou2, std::weak_ordering::less);

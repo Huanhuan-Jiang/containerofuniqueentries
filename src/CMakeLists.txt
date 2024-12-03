@@ -1,7 +1,7 @@
 set(LIBRARY_NAME containerofunique)
 
-set(SOURCE_FILES dequeofunique.cpp dequeofunique.h)
+set(SOURCE_FILES dequeofunique.h)
 
-add_library(${LIBRARY_NAME} ${SOURCE_FILES})
+add_library(${LIBRARY_NAME} INTERFACE)
 
-target_include_directories(${LIBRARY_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${LIBRARY_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

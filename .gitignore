@@ -1,0 +1,6 @@
+.DS_Store
+.vscode/
+build/
+output.pdf
+--color
+format_changes.log

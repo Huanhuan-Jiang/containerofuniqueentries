@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.29)
-project(dequeofuniquetest VERSION 1.0)
+project(containerofuniquetest VERSION 1.0)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -15,13 +15,15 @@ add_subdirectory(src)
 add_subdirectory(thirdparty/googletest)
 
 add_executable(dequeofuniquetest tests/test_dequeofunique.cpp)
+add_executable(vectorofuniquetest tests/test_vectorofunique.cpp)
 
-target_link_libraries(dequeofuniquetest PRIVATE 
+target_link_libraries(dequeofuniquetest vectorofuniquetest PRIVATE 
     GTest::gtest_main 
     GTest::gmock_main
 )
 
-target_link_libraries(dequeofuniquetest PRIVATE containerofunique)
+target_link_libraries(dequeofuniquetest vectorofuniquetest PRIVATE 
+containerofunique)
 
 enable_testing()
 

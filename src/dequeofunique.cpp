@@ -27,7 +27,6 @@ class deque_of_unique {
   using DequeType = std::deque<T>;
   using UnorderedSetType = std::unordered_set<T, Hash, KeyEqual>;
   using size_type = typename DequeType::size_type;
-  using iterator = typename DequeType::iterator;
   using const_iterator = typename DequeType::const_iterator;
   using reverse_iterator = typename DequeType::reverse_iterator;
   using const_reverse_iterator = typename DequeType::const_reverse_iterator;

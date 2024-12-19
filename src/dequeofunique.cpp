@@ -23,7 +23,6 @@ class deque_of_unique {
   using key_type = T;
   using hasher = Hash;
   using key_equal = KeyEqual;
-  using reference = value_type&;
   using const_reference = const value_type&;
   using DequeType = std::deque<T>;
   using UnorderedSetType = std::unordered_set<T, Hash, KeyEqual>;

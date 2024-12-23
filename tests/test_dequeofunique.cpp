@@ -154,17 +154,63 @@ TEST(DequeOfUniqueTest, ElementAccess_ConstDeque) {
   EXPECT_EQ(dou.back(), "world");
 }
 
-TEST(DequeOfUniqueTest, Iterators) {
+// Test for normal iteration using cbegin() and cend()
+TEST(DequeOfUniqueTest, CbeginCend_Iteration) {
   containerofunique::deque_of_unique<int> dou = {1, 2, 3, 4};
-  EXPECT_EQ(*dou.cbegin(), 1);
-  EXPECT_EQ(*--dou.cend(), 4);
-  EXPECT_EQ(*dou.crbegin(), 4);
-  EXPECT_EQ(*--dou.crend(), 1);
+
+  auto it = dou.cbegin();
+  EXPECT_EQ(*it, 1);
+  ++it;
+  EXPECT_EQ(*it, 2);
+  ++it;
+  EXPECT_EQ(*it, 3);
+  ++it;
+  EXPECT_EQ(*it, 4);
+  ++it;
+  EXPECT_EQ(it, dou.cend()); // Ensure iterator reaches cend()
+}
+
+// Test for normal iteration using crbegin() and crend()
+TEST(DequeOfUniqueTest, CrbeginCrend_Iteration) {
+  containerofunique::deque_of_unique<int> dou = {1, 2, 3, 4};
+
+  auto rit = dou.crbegin();
+  EXPECT_EQ(*rit, 4);
+  ++rit;
+  EXPECT_EQ(*rit, 3);
+  ++rit;
+  EXPECT_EQ(*rit, 2);
+  ++rit;
+  EXPECT_EQ(*rit, 1);
+  ++rit;
+  EXPECT_EQ(rit, dou.crend()); // Ensure reverse iterator reaches crend()
+}
+
+// Test for empty container's iterators
+TEST(DequeOfUniqueTest, EmptyContainer_Iterators) {
+  containerofunique::deque_of_unique<int> empty_dou;
+
+  // For an empty deque, cbegin() should be equal to cend()
+  EXPECT_EQ(empty_dou.cbegin(), empty_dou.cend());
+  // For an empty deque, crbegin() should be equal to crend()
+  EXPECT_EQ(empty_dou.crbegin(), empty_dou.crend());
+}
+
+// Test for const-correctness of iterators
+TEST(DequeOfUniqueTest, ConstCorrectness_Iterators) {
+  containerofunique::deque_of_unique<int> dou = {1, 2, 3, 4};
 
   EXPECT_TRUE((std::same_as<decltype(*dou.cbegin()), const int &>));
   EXPECT_TRUE((std::same_as<decltype(*dou.cend()), const int &>));
   EXPECT_TRUE((std::same_as<decltype(*dou.crbegin()), const int &>));
   EXPECT_TRUE((std::same_as<decltype(*dou.crend()), const int &>));
+}
+
+// Test that iterators do not modify elements (compile-time check)
+TEST(DequeOfUniqueTest, Iterator_ModificationNotAllowed) {
+  containerofunique::deque_of_unique<int> dou = {1, 2, 3, 4};
+  auto const_it = dou.cbegin();
+  ASSERT_TRUE(std::is_const_v<std::remove_reference_t<decltype(*const_it)>>);
 }
 
 TEST(DequeOfUniqueTest, ClearAndErase) {

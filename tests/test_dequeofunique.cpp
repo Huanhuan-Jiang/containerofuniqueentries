@@ -33,9 +33,10 @@ TEST(DequeOfUniqueTest, ConstructorInitializesFromIterators) {
 }
 
 TEST(DequeOfUniqueTest, ConstructorWithInitializerListChecksDequeAndSet) {
-  containerofunique::deque_of_unique dou1 = {1};
-  containerofunique::deque_of_unique dou2 = {1, 2};
-  containerofunique::deque_of_unique dou3 = {1, 2, 3, 3};  // duplicate elements
+  containerofunique::deque_of_unique<int> dou1 = {1};
+  containerofunique::deque_of_unique<int> dou2 = {1, 2};
+  containerofunique::deque_of_unique<int> dou3 = {1, 2, 3,
+                                                  3};  // duplicate elements
 
   std::deque<int> dq1 = {1};
   std::deque<int> dq2 = {1, 2};
@@ -76,16 +77,15 @@ TEST(DequeOfUniqueTest, CopyConstructor_Independence) {
 
   dou1.push_back(4);  // Modify the original
   EXPECT_EQ(dou1.deque(), std::deque<int>({1, 2, 3, 4}));
-  EXPECT_EQ(dou2.deque(),
-            std::deque<int>({1, 2, 3}));  // Copy should remain unchanged
+  EXPECT_EQ(dou2.deque(), std::deque<int>({1, 2, 3}));
 }
+
 TEST(DequeOfUniqueTest, CopyConstructor_LargeData) {
   std::deque<int> large_data(1000);
-  std::ranges::iota(large_data, 0);
+  std::ranges::iota(large_data.begin(), large_data.end(), 0);
 
   containerofunique::deque_of_unique<int> dou1(large_data.begin(),
                                                large_data.end());
-  // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
   containerofunique::deque_of_unique<int> dou2(dou1);
 
   EXPECT_EQ(dou1.deque(), dou2.deque());
@@ -336,7 +336,7 @@ TEST(DequeOfUniqueTest, InsertRangeTest) {
 
 TEST(DequeOfUniqueTest, InsertEmptyRange) {
   containerofunique::deque_of_unique<std::string> dou1 = {"existing"};
-  containerofunique::deque_of_unique<std::string> dq1 = {"existing"};
+  std::deque<std::string> dq1 = {"existing"};
   std::deque<std::string> dq2 = {"hello", "world", "apple", "fruit"};
 
   auto result1 = dou1.insert(dou1.cbegin(), dq2.begin(), dq2.begin());
@@ -446,7 +446,7 @@ TEST(DequeOfUniqueTest, EmplaceFront_NewElement) {
   dq.emplace_front("good");
   EXPECT_EQ(*dou.cbegin(), "good");
   ASSERT_TRUE(result.has_value());
-  EXPECT_EQ(result.value(), "good");
+  EXPECT_EQ(result.value().get(), "good");
   EXPECT_EQ(dou.deque(), dq);
 }
 
@@ -472,7 +472,7 @@ TEST(DequeOfUniqueTest, EmplaceFront_Rvalue) {
   std::deque<std::string> dq = {"good", "hello", "world"};
   EXPECT_EQ(*dou.cbegin(), "good");
   ASSERT_TRUE(result.has_value());
-  EXPECT_EQ(result.value(), "good");
+  EXPECT_EQ(result.value().get(), "good");
   EXPECT_EQ(dou.deque(), dq);
 }
 
@@ -498,7 +498,7 @@ TEST(DequeOfUniqueTest, EmplaceFront_EmptyDeque) {
   std::deque<std::string> dq = {"first"};
   EXPECT_EQ(*dou_empty.cbegin(), "first");
   ASSERT_TRUE(result_empty.has_value());
-  EXPECT_EQ(result_empty.value(), "first");
+  EXPECT_EQ(result_empty.value().get(), "first");
   EXPECT_EQ(dou_empty.deque(), dq);
 }
 
@@ -540,7 +540,7 @@ TEST(DequeOfUniqueTest, EmplaceBack_NewElement) {
   dq.emplace_back("good");
   EXPECT_EQ(*(dou.cend() - 1), "good");
   ASSERT_TRUE(result.has_value());
-  EXPECT_EQ(result.value(), "good");
+  EXPECT_EQ(result.value().get(), "good");
   EXPECT_EQ(dou.deque(), dq);
 }
 
@@ -566,7 +566,7 @@ TEST(DequeOfUniqueTest, EmplaceBack_Rvalue) {
   std::deque<std::string> dq = {"hello", "world", "good"};
   EXPECT_EQ(*(dou.cend() - 1), "good");
   ASSERT_TRUE(result.has_value());
-  EXPECT_EQ(result.value(), "good");
+  EXPECT_EQ(result.value().get(), "good");
   EXPECT_EQ(dou.deque(), dq);
 }
 
@@ -592,7 +592,7 @@ TEST(DequeOfUniqueTest, EmplaceBack_EmptyDeque) {
   std::deque<std::string> dq = {"first"};
   EXPECT_EQ(*dou_empty.cbegin(), "first");
   ASSERT_TRUE(result_empty.has_value());
-  EXPECT_EQ(result_empty.value(), "first");
+  EXPECT_EQ(result_empty.value().get(), "first");
   EXPECT_EQ(dou_empty.deque(), dq);
 }
 
@@ -622,7 +622,7 @@ TEST(DequeOfUniqueTest, EmplaceBack_NonStringType) {
   std::deque<int> dq = {1, 2, 3, 4};
   EXPECT_EQ(*(dou.cend() - 1), 4);
   ASSERT_TRUE(result.has_value());
-  EXPECT_EQ(result.value(), 4);
+  EXPECT_EQ(result.value().get(), 4);
   EXPECT_EQ(dou.deque(), dq);
 }
 
@@ -762,6 +762,7 @@ TEST(DequeOfUniqueTest, PushBack_DuplicateElement) {
   // Test pushing a duplicate element
   bool result = dou.push_back("hello");
   EXPECT_FALSE(result);  // Should return false
+  EXPECT_EQ(dou.size(), 2);
   EXPECT_EQ(dou.deque(), expected);
   EXPECT_THAT(dou.set(), ::testing::UnorderedElementsAreArray(expected));
 }
@@ -856,7 +857,7 @@ TEST(DequeOfUniqueTest, Size) {
   EXPECT_EQ(dou2.size(), 4);
 
   // Attempting to add a duplicate element does not change the size
-  dou2.push_back("good");  // "good" is already in the deque
+  dou2.push_back("morning");  // "good" is already in the deque
   EXPECT_EQ(dou2.size(), 4);
 
   // Test 3: Empty deque

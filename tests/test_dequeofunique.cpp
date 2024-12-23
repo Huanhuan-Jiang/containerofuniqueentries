@@ -135,6 +135,25 @@ TEST(DequeOfUniqueTest, ElementAccess) {
   EXPECT_EQ(dou.back(), 4);
 }
 
+TEST(DequeOfUniqueTest, At_OutOfRange) {
+  containerofunique::deque_of_unique<int> dou = {1, 2, 3, 4};
+  const containerofunique::deque_of_unique<std::string> dou_const = {"hello",
+                                                                     "world"};
+  EXPECT_THROW(dou.at(4), std::out_of_range);
+  EXPECT_THROW(dou_const.at(2), std::out_of_range);
+}
+
+TEST(DequeOfUniqueTest, ElementAccess_ConstDeque) {
+  const containerofunique::deque_of_unique<std::string> dou = {"hello",
+                                                               "world"};
+  EXPECT_EQ(dou.front(), "hello");
+  EXPECT_EQ(dou.at(0), "hello");
+  EXPECT_EQ(dou.at(1), "world");
+  EXPECT_EQ(dou[0], "hello");
+  EXPECT_EQ(dou[1], "world");
+  EXPECT_EQ(dou.back(), "world");
+}
+
 TEST(DequeOfUniqueTest, Iterators) {
   containerofunique::deque_of_unique<int> dou = {1, 2, 3, 4};
   EXPECT_EQ(*dou.cbegin(), 1);

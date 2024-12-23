@@ -219,7 +219,7 @@ TEST(DequeOfUniqueTest, InsertRangeTest) {
   std::deque<std::string> dq6 = {"good", "morning", "hello", "world"};
   auto result6_1 = dou6.insert(dou6.cbegin(), {"good", "morning"});
   EXPECT_EQ(dou6.deque(), dq6);
-  EXPECT_EQ(*result6_1, *(dou6.cbegin() + 1));
+  EXPECT_EQ(*result6_1, *dou6.cbegin());
   auto result6_2 = dou6.insert(dou6.cbegin(), {"good", "morning"});
   EXPECT_EQ(dou6.deque(), dq6);
   EXPECT_EQ(*result6_2, *dou6.cbegin());

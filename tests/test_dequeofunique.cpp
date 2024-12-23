@@ -35,7 +35,7 @@ TEST(DequeOfUniqueTest, ConstructorInitializesFromIterators) {
 TEST(DequeOfUniqueTest, ConstructorWithInitializerListChecksDequeAndSet) {
   containerofunique::deque_of_unique dou1 = {1};
   containerofunique::deque_of_unique dou2 = {1, 2};
-  containerofunique::deque_of_unique dou3 = {1, 2, 3, 3};  // duplicate elements
+  containerofunique::deque_of_unique dou3 = {1, 2, 3, 3}; // duplicate elements
 
   std::deque<int> dq1 = {1};
   std::deque<int> dq2 = {1, 2};
@@ -72,10 +72,10 @@ TEST(DequeOfUniqueTest, CopyConstructor_Independence) {
   containerofunique::deque_of_unique<int> dou1 = {1, 2, 3};
   containerofunique::deque_of_unique<int> dou2(dou1);
 
-  dou1.push_back(4);  // Modify the original
+  dou1.push_back(4); // Modify the original
   EXPECT_EQ(dou1.deque(), std::deque<int>({1, 2, 3, 4}));
   EXPECT_EQ(dou2.deque(),
-            std::deque<int>({1, 2, 3}));  // Copy should remain unchanged
+            std::deque<int>({1, 2, 3})); // Copy should remain unchanged
 }
 TEST(DequeOfUniqueTest, CopyConstructor_LargeData) {
   std::deque<int> large_data(1000);
@@ -105,8 +105,8 @@ TEST(DequeOfUniqueTest, CopyAssignmentOperator) {
   EXPECT_THAT(std::deque<int>(dou2.set().begin(), dou2.set().end()),
               ::testing::UnorderedElementsAreArray(dq));
   dou1.push_back(
-      5);  // This is used to suppress warning of
-           // [performance-unnecessary-copy-initialization,-warnings-as-errors]
+      5); // This is used to suppress warning of
+          // [performance-unnecessary-copy-initialization,-warnings-as-errors]
 }
 
 TEST(DequeOfUniqueTest, MoveAssignmentOperator) {
@@ -281,11 +281,10 @@ struct ThrowingType {
 };
 
 namespace std {
-template <>
-struct hash<ThrowingType> {
+template <> struct hash<ThrowingType> {
   size_t operator()(const ThrowingType &obj) const { return 0; }
 };
-}  // namespace std
+} // namespace std
 
 TEST(DequeOfUniqueTest, EmplaceExceptionSafety) {
   containerofunique::deque_of_unique<ThrowingType> dou;
@@ -314,7 +313,7 @@ TEST(DequeOfUniqueTest, EmplaceNonString) {
 
   // Attempt to emplace a duplicate
   result = dou.emplace(dou.cbegin(), 4);
-  EXPECT_EQ(dou.deque(), dq);  // No change
+  EXPECT_EQ(dou.deque(), dq); // No change
   EXPECT_FALSE(result.second);
 }
 
@@ -507,12 +506,34 @@ TEST(DequeOfUniqueTest, EmplaceBack_NonStringType) {
   EXPECT_EQ(dou.deque(), dq);
 }
 
-TEST(DequeOfUniqueTest, PopFront) {
-  containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
-  std::deque<std::string> dq = {"world"};
+TEST(DequeOfUniqueTest, PopFront_EmptyDeque) {
+  containerofunique::deque_of_unique<std::string> dou;
+  EXPECT_NO_THROW(dou.pop_front());
+  // EXPECT_TRUE(dou.deque().empty());
+  // EXPECT_TRUE(dou.set().empty());
+}
+
+TEST(DequeOfUniqueTest, PopFront_SingleElement) {
+  containerofunique::deque_of_unique<std::string> dou = {"hello"};
   dou.pop_front();
-  EXPECT_EQ(dou.deque(), dq);
-  EXPECT_THAT(dou.set(), ::testing::UnorderedElementsAreArray(dq));
+  EXPECT_TRUE(dou.deque().empty());
+  EXPECT_TRUE(dou.set().empty());
+}
+
+TEST(DequeOfUniqueTest, PopFront_MultipleSequential) {
+  containerofunique::deque_of_unique<std::string> dou = {"hello", "world",
+                                                         "goodbye"};
+  dou.pop_front();
+  EXPECT_EQ(dou.deque(), (std::deque<std::string>{"world", "goodbye"}));
+  EXPECT_THAT(dou.set(), ::testing::UnorderedElementsAre("world", "goodbye"));
+
+  dou.pop_front();
+  EXPECT_EQ(dou.deque(), (std::deque<std::string>{"goodbye"}));
+  EXPECT_THAT(dou.set(), ::testing::UnorderedElementsAre("goodbye"));
+
+  dou.pop_front();
+  EXPECT_TRUE(dou.deque().empty());
+  EXPECT_TRUE(dou.set().empty());
 }
 
 TEST(DequeOfUniqueTest, PopBack) {

@@ -148,9 +148,11 @@ public:
   }
 
   void pop_front() {
-    const auto &f = deque_.front();
-    deque_.pop_front();
-    set_.erase(f);
+    if (!deque_.empty()) {
+      const auto &f = deque_.front();
+      deque_.pop_front();
+      set_.erase(f);
+    }
   }
 
   void pop_back() {

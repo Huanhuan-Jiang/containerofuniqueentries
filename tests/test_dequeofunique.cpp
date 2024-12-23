@@ -217,52 +217,77 @@ TEST(DequeOfUniqueTest, InsertAtBeginning) {
   EXPECT_EQ(dou.deque(), (std::deque<std::string>{"hello", "world"}));
 }
 
-TEST(DequeOfUniqueTest, Emplace) {
-  // Emplace "good" at the begining
-  containerofunique::deque_of_unique<std::string> dou1 = {"hello", "world"};
-  std::deque<std::string> dq1 = {"hello", "world"};
-  auto result1_1 = dou1.emplace(dou1.cbegin(), "good");
-  dq1.emplace(dq1.begin(), "good");
-  EXPECT_EQ(dou1.deque(), dq1);
-  EXPECT_EQ(*result1_1.first, *dou1.cbegin());
-  EXPECT_TRUE(result1_1.second);
+TEST(DequeOfUniqueTest, EmplaceIntoEmpty) {
+  containerofunique::deque_of_unique<std::string> dou;
+  std::deque<std::string> dq;
 
-  // Emplace "morning" in the middle
-  // Now dou1.deque() =dq1 = {"good", "hello", "world"}
-  auto result1_2 = dou1.emplace(dou1.cbegin() + 1, "morning");
-  dq1.emplace(dq1.begin() + 1, "morning");
-  EXPECT_EQ(dou1.deque(), dq1);
-  EXPECT_EQ(*result1_2.first, *(dou1.cbegin() + 1));
-  EXPECT_TRUE(result1_2.second);
+  auto result = dou.emplace(dou.cbegin(), "hello");
+  dq.emplace(dq.begin(), "hello");
 
-  // Emplace "good" at the begining
-  auto result1_3 = dou1.emplace(dou1.cbegin() + 1, "good");
-  EXPECT_EQ(dou1.deque(), dq1);
-  EXPECT_EQ(*result1_3.first, *(dou1.cbegin() + 1));
-  EXPECT_FALSE(result1_3.second);
+  EXPECT_EQ(dou.deque(), dq);
+  EXPECT_EQ(*result.first, *dou.cbegin());
+  EXPECT_TRUE(result.second);
+}
 
-  // Emplace "good" in the middle
-  auto result1_4 = dou1.emplace(dou1.cbegin() + 1, "good");
-  EXPECT_EQ(dou1.deque(), dq1);
-  EXPECT_EQ(*result1_4.first, *(dou1.cbegin() + 1));
-  EXPECT_FALSE(result1_4.second);
+TEST(DequeOfUniqueTest, EmplaceAtEnd) {
+  containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
+  std::deque<std::string> dq = {"hello", "world"};
 
-  // Emplace rvalue "good" at the begining
-  containerofunique::deque_of_unique<std::string> dou2 = {"hello", "world"};
-  std::deque<std::string> dq2 = {"hello", "world"};
-  std::string str1 = "good";
-  auto result2_1 = dou2.emplace(dou2.cbegin(), std::move(str1));
-  dq2.emplace(dq2.begin(), "good");
-  EXPECT_EQ(dou2.deque(), dq2);
-  EXPECT_EQ(*result2_1.first, *dou2.cbegin());
-  EXPECT_TRUE(result2_1.second);
+  auto result = dou.emplace(dou.cend(), "goodbye");
+  dq.emplace(dq.end(), "goodbye");
 
-  // Emplace rvalue "good" in the middle
-  std::string str2 = "good";
-  auto result2_2 = dou2.emplace(dou2.cbegin(), std::move(str2));
-  EXPECT_EQ(dou2.deque(), dq2);
-  EXPECT_EQ(*result2_2.first, *dou2.cbegin());
-  EXPECT_FALSE(result2_2.second);
+  EXPECT_EQ(dou.deque(), dq);
+  EXPECT_EQ(*result.first, *(dou.cend() - 1));
+  EXPECT_TRUE(result.second);
+}
+
+struct ThrowingType {
+  std::string value;
+  ThrowingType(const std::string &val) : value(val) {
+    if (val == "throw") {
+      throw std::runtime_error("Test exception");
+    }
+  }
+  bool operator==(const ThrowingType &other) const {
+    return value == other.value;
+  }
+};
+
+namespace std {
+template <> struct hash<ThrowingType> {
+  size_t operator()(const ThrowingType &obj) const { return 0; }
+};
+} // namespace std
+
+TEST(DequeOfUniqueTest, EmplaceExceptionSafety) {
+  containerofunique::deque_of_unique<ThrowingType> dou;
+
+  // Normal insertion
+  EXPECT_NO_THROW(dou.emplace(dou.cbegin(), "hello"));
+
+  // Exception-throwing insertion
+  EXPECT_THROW(dou.emplace(dou.cbegin(), "throw"), std::runtime_error);
+
+  // Ensure the container remains consistent
+  EXPECT_EQ(dou.deque().size(), 1);
+  EXPECT_EQ(dou.deque().front().value, "hello");
+}
+
+TEST(DequeOfUniqueTest, EmplaceNonString) {
+  containerofunique::deque_of_unique<int> dou = {1, 2, 3};
+  std::deque<int> dq = {1, 2, 3};
+
+  auto result = dou.emplace(dou.cbegin(), 4);
+  dq.emplace(dq.begin(), 4);
+
+  EXPECT_EQ(dou.deque(), dq);
+  EXPECT_EQ(*result.first, *dou.cbegin());
+  EXPECT_TRUE(result.second);
+
+  // Attempt to emplace a duplicate
+  result = dou.emplace(dou.cbegin(), 4);
+  EXPECT_EQ(dou.deque(), dq); // No change
+  EXPECT_FALSE(result.second);
 }
 
 TEST(DequeOfUniqueTest, EmplaceFront) {

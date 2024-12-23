@@ -536,6 +536,18 @@ TEST(DequeOfUniqueTest, PopFront_MultipleSequential) {
   EXPECT_TRUE(dou.set().empty());
 }
 
+TEST(DequeOfUniqueTest, Front_AfterModification) {
+  containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
+
+  // Add a new element at the front
+  dou.emplace_front("good");
+  EXPECT_EQ(dou.front(), "good"); // The front should now be "good"
+
+  // Remove the front element
+  dou.pop_front();
+  EXPECT_EQ(dou.front(), "hello"); // The front should now be "hello"
+}
+
 TEST(DequeOfUniqueTest, PopBack) {
   containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
   std::deque<std::string> dq = {"hello"};

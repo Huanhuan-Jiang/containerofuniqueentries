@@ -99,13 +99,21 @@ public:
 
   template <class input_it>
   const_iterator insert(const_iterator pos, input_it first, input_it last) {
-    auto return_it = pos;
+    const_iterator first_inserted = pos;
+    auto temp_pos = deque_.begin() + (pos - deque_.cbegin());
+    auto any_inserted = false;
+
     for (auto it = first; it != last; ++it) {
       if (set_.insert(*it).second) {
-        return_it = deque_.insert(pos, *it);
+        temp_pos = deque_.insert(temp_pos, *it);
+        if (!any_inserted) {
+          first_inserted = temp_pos;
+          any_inserted = true;
+        }
+        ++temp_pos;
       }
     }
-    return return_it;
+    return any_inserted ? first_inserted : pos;
   }
 
   const_iterator insert(const_iterator pos, std::initializer_list<T> ilist) {

@@ -297,20 +297,23 @@ TEST(DequeOfUniqueTest, EmplaceFront_NewElement) {
   std::deque<std::string> dq = {"hello", "world"};
   auto result = dou.emplace_front("good");
   dq.emplace_front("good");
-  EXPECT_EQ(*dou.cbegin(), "good"); // Check if "good" is at the front
-  ASSERT_TRUE(result.has_value());  // Ensure emplace_front succeeded
-  EXPECT_EQ(result.value().get(),
-            "good"); // Verify the inserted value is "good"
+  EXPECT_EQ(*dou.cbegin(), "good");
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result.value().get(), "good");
+  EXPECT_EQ(dou.deque(), dq);
 }
 
 TEST(DequeOfUniqueTest, EmplaceFront_DuplicateElement) {
   // Test 2: Try emplacing "good" twice (duplicate value)
   // Expected: No insertion, deque remains unchanged
   containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
+  std::deque<std::string> dq = {"hello", "world"};
   dou.emplace_front("good");
+  dq.emplace_front("good");
   auto result = dou.emplace_front("good");
-  EXPECT_EQ(*dou.cbegin(), "good"); // "good" should still be at the front
-  EXPECT_EQ(result, std::nullopt);  // No new element should be inserted
+  EXPECT_EQ(*dou.cbegin(), "good");
+  EXPECT_EQ(result, std::nullopt);
+  EXPECT_EQ(dou.deque(), dq);
 }
 
 TEST(DequeOfUniqueTest, EmplaceFront_Rvalue) {
@@ -319,9 +322,11 @@ TEST(DequeOfUniqueTest, EmplaceFront_Rvalue) {
   containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
   std::string str = "good";
   auto result = dou.emplace_front(std::move(str));
-  EXPECT_EQ(*dou.cbegin(), "good");        // "good" should be at the front
-  ASSERT_TRUE(result.has_value());         // Ensure emplace_front succeeded
-  EXPECT_EQ(result.value().get(), "good"); // Check the inserted value
+  std::deque<std::string> dq = {"good", "hello", "world"};
+  EXPECT_EQ(*dou.cbegin(), "good");
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result.value().get(), "good");
+  EXPECT_EQ(dou.deque(), dq);
 }
 
 TEST(DequeOfUniqueTest, EmplaceFront_DuplicateRvalue) {
@@ -332,8 +337,10 @@ TEST(DequeOfUniqueTest, EmplaceFront_DuplicateRvalue) {
   std::string str2 = "good";
   dou.emplace_front(std::move(str1));
   auto result = dou.emplace_front(std::move(str2));
-  EXPECT_EQ(*dou.cbegin(), "good"); // "good" should still be at the front
-  EXPECT_EQ(result, std::nullopt);  // No new element should be inserted
+  std::deque<std::string> dq = {"good", "hello", "world"};
+  EXPECT_EQ(*dou.cbegin(), "good");
+  EXPECT_EQ(result, std::nullopt);
+  EXPECT_EQ(dou.deque(), dq);
 }
 
 TEST(DequeOfUniqueTest, EmplaceFront_EmptyDeque) {
@@ -341,72 +348,135 @@ TEST(DequeOfUniqueTest, EmplaceFront_EmptyDeque) {
   // Expected: "first" should be at the front of the deque
   containerofunique::deque_of_unique<std::string> dou_empty;
   auto result_empty = dou_empty.emplace_front("first");
-  EXPECT_EQ(*dou_empty.cbegin(), "first"); // "first" should be at the front
-  ASSERT_TRUE(result_empty.has_value());   // Ensure emplace_front succeeded
-  EXPECT_EQ(result_empty.value().get(), "first"); // Check the inserted value
+  std::deque<std::string> dq = {"first"};
+  EXPECT_EQ(*dou_empty.cbegin(), "first");
+  ASSERT_TRUE(result_empty.has_value());
+  EXPECT_EQ(result_empty.value().get(), "first");
+  EXPECT_EQ(dou_empty.deque(), dq);
 }
 
 TEST(DequeOfUniqueTest, EmplaceFront_MultipleElements) {
   // Test 6: Emplace multiple distinct elements to the front of the deque
   // Expected: Elements should be inserted at the front in the order of
   // emplace_front calls
-  containerofunique::deque_of_unique<std::string> dou_multi = {"hello"};
-  dou_multi.emplace_front("world");
-  dou_multi.emplace_front("good");
-  dou_multi.emplace_front("morning");
+  containerofunique::deque_of_unique<std::string> dou = {"hello"};
+  dou.emplace_front("world");
+  dou.emplace_front("good");
+  dou.emplace_front("morning");
 
-  EXPECT_EQ(*dou_multi.cbegin(), "morning"); // "morning" should be at the front
-  EXPECT_EQ(*(dou_multi.cbegin() + 1), "good");  // "good" should be second
-  EXPECT_EQ(*(dou_multi.cbegin() + 2), "world"); // "world" should be third
-  EXPECT_EQ(*(dou_multi.cbegin() + 3), "hello"); // "hello" should be at the end
+  std::deque<std::string> dq = {"morning", "good", "world", "hello"};
+
+  EXPECT_EQ(*dou.cbegin(), "morning");
+  EXPECT_EQ(*(dou.cbegin() + 1), "good");
+  EXPECT_EQ(*(dou.cbegin() + 2), "world");
+  EXPECT_EQ(*(dou.cbegin() + 3), "hello");
+  EXPECT_EQ(dou.deque(), dq);
 }
 
 TEST(DequeOfUniqueTest, EmplaceFront_NonStringType) {
   // Test 7: Emplace an integer to the front of an integer deque (non-string
   // type) Expected: The integer 4 should be at the front of the deque
-  containerofunique::deque_of_unique<int> dou_int = {1, 2, 3};
-  auto result_int = dou_int.emplace_front(4);
-  EXPECT_EQ(*dou_int.cbegin(), 4);        // 4 should be at the front
-  ASSERT_TRUE(result_int.has_value());    // Ensure emplace_front succeeded
-  EXPECT_EQ(result_int.value().get(), 4); // Check the inserted value
+  containerofunique::deque_of_unique<int> dou = {1, 2, 3};
+  auto result = dou.emplace_front(4);
+  std::deque<int> dq = {1, 2, 3, 4};
+  EXPECT_EQ(*dou.cbegin(), 4);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result.value().get(), 4);
 }
 
-TEST(DequeOfUniqueTest, EmplaceBack) {
+TEST(DequeOfUniqueTest, EmplaceBack_NewElement) {
+  // Test 1: Emplace a new element "good" to the end of dou
   // Emplace_back "good" to dou1
-  containerofunique::deque_of_unique<std::string> dou1 = {"hello", "world"};
-  std::deque<std::string> dq1 = {"hello", "world"};
-  auto result1_1 = dou1.emplace_back("good");
-  dq1.emplace_back("good");
-  EXPECT_EQ(*(dou1.cend() - 1), "good");
-  if (result1_1.has_value()) {
-    EXPECT_EQ(result1_1.value().get(), "good");
-  } else {
-    FAIL() << "result1_1 does not contain a value.";
-  }
+  containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
+  std::deque<std::string> dq = {"hello", "world"};
+  auto result = dou.emplace_back("good");
+  dq.emplace_back("good");
+  EXPECT_EQ(*(dou.cend() - 1), "good");
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result.value().get(), "good");
+  EXPECT_EQ(dou.deque(), dq);
+}
 
-  // Emplace_back "good" to dou1 again
-  auto result1_2 = dou1.emplace_back("good");
-  EXPECT_EQ(*(dou1.cend() - 1), "good");
-  EXPECT_EQ(result1_2, std::nullopt);
+TEST(DequeOfUniqueTest, EmplaceBack_DuplicateElement) {
+  // Test 2: Try emplacing "good" twice (duplicate value)
+  // Expected: No insertion, deque remains unchanged
+  containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
+  std::deque<std::string> dq = {"hello", "world"};
+  dou.emplace_back("good");
+  dq.emplace_back("good");
+  auto result = dou.emplace_back("good");
+  EXPECT_EQ(*(dou.cend() - 1), "good");
+  EXPECT_EQ(result, std::nullopt);
+  EXPECT_EQ(dou.deque(), dq);
+}
 
-  // Emplace_back rvalue "good" to dou2
-  containerofunique::deque_of_unique<std::string> dou2 = {"hello", "world"};
-  std::deque<std::string> dq2 = {"hello", "world"};
+TEST(DequeOfUniqueTest, EmplaceBack_Rvalue) {
+  // Test 3: Emplace an rvalue "good" to the back of dou
+  // Expected: "good" should be inserted at the end of the deque
+  containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
+  std::string str = "good";
+  auto result = dou.emplace_back(std::move(str));
+  std::deque<std::string> dq = {"hello", "world", "good"};
+  EXPECT_EQ(*(dou.cend() - 1), "good");
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result.value().get(), "good");
+  EXPECT_EQ(dou.deque(), dq);
+}
+
+TEST(DequeOfUniqueTest, EmplaceBack_DuplicateRvalue) {
+  // Test 4: Try emplacing the rvalues "good" twice (duplicate value)
+  // Expected: No insertion, deque remains unchanged
+  containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
   std::string str1 = "good";
-  auto result2_1 = dou2.emplace_back(std::move(str1));
-  dq2.emplace_back("good");
-  EXPECT_EQ(*(dou2.cend() - 1), "good");
-  if (result2_1.has_value()) {
-    EXPECT_EQ(result2_1.value().get(), "good");
-  } else {
-    FAIL() << "result2_1 does not contain a value.";
-  }
-
-  // Emplace_back rvalue "good" to dou2 again
   std::string str2 = "good";
-  auto result2_2 = dou2.emplace_back(std::move(str2));
-  EXPECT_EQ(*(dou2.cend() - 1), "good");
-  EXPECT_EQ(result2_2, std::nullopt);
+  dou.emplace_back(std::move(str1));
+  auto result = dou.emplace_back(std::move(str2));
+  std::deque<std::string> dq = {"hello", "world", "good"};
+  EXPECT_EQ(*(dou.cend() - 1), "good");
+  EXPECT_EQ(result, std::nullopt);
+  EXPECT_EQ(dou.deque(), dq);
+}
+
+TEST(DequeOfUniqueTest, EmplaceBack_EmptyDeque) {
+  // Test 5: Emplace a new element "first" to an empty deque
+  // Expected: "first" should be at the back of the deque
+  containerofunique::deque_of_unique<std::string> dou_empty;
+  auto result_empty = dou_empty.emplace_back("first");
+  std::deque<std::string> dq = {"first"};
+  EXPECT_EQ(*dou_empty.cbegin(), "first");
+  ASSERT_TRUE(result_empty.has_value());
+  EXPECT_EQ(result_empty.value().get(), "first");
+  EXPECT_EQ(dou_empty.deque(), dq);
+}
+
+TEST(DequeOfUniqueTest, EmplaceBack_MultipleElements) {
+  // Test 6: Emplace multiple distinct elements to the back of the deque
+  // Expected: Elements should be inserted at the back in the order of
+  // emplace_back calls
+  containerofunique::deque_of_unique<std::string> dou = {"hello"};
+  dou.emplace_back("world");
+  dou.emplace_back("good");
+  dou.emplace_back("morning");
+
+  std::deque<std::string> dq = {"hello", "world", "good", "morning"};
+
+  EXPECT_EQ(*(dou.cend() - 1), "morning");
+  EXPECT_EQ(*(dou.cend() - 2), "good");
+  EXPECT_EQ(*(dou.cend() - 3), "world");
+  EXPECT_EQ(*(dou.cend() - 4), "hello");
+  EXPECT_EQ(dou.deque(), dq);
+}
+
+TEST(DequeOfUniqueTest, EmplaceBack_NonStringType) {
+  // Test 7: Emplace an integer to the back of an integer deque (non-string
+  // type) Expected: The integer 4 should be at the back of the deque
+  containerofunique::deque_of_unique<int> dou = {1, 2, 3};
+  auto result = dou.emplace_back(4);
+  std::deque<int> dq = {1, 2, 3, 4};
+  EXPECT_EQ(*(dou.cend() - 1), 4);
+  ASSERT_TRUE(result.has_value());
+  EXPECT_EQ(result.value().get(), 4);
+  EXPECT_EQ(dou.deque(), dq);
 }
 
 TEST(DequeOfUniqueTest, PopFront) {

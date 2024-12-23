@@ -854,14 +854,28 @@ TEST(DequeOfUniqueTest, Size) {
 }
 
 TEST(DequeOfUniqueTest, Operator) {
+  // Test 1: Identical deques
   containerofunique::deque_of_unique<std::string> dou1_1 = {"good"};
   containerofunique::deque_of_unique<std::string> dou1_2 = {"good"};
-  containerofunique::deque_of_unique<std::string> dou2 = {"good", "morning",
-                                                          "hello", "world"};
-  containerofunique::deque_of_unique<std::string> dou3 = {"flower", "apple",
-                                                          "fruit"};
-
   EXPECT_EQ(dou1_1 <=> dou1_2, std::strong_ordering::equal);
+
+  // Test 2: Subset case
+  containerofunique::deque_of_unique<std::string> dou2 = {"good", "morning"};
   EXPECT_EQ(dou1_1 <=> dou2, std::weak_ordering::less);
-  EXPECT_EQ(dou1_1 <=> dou3, std::weak_ordering::greater);
+  EXPECT_EQ(dou2 <=> dou1_1, std::weak_ordering::greater);
+
+  // Test 3: Different order case (for robustness, even if not expected in
+  // unique deques)
+  containerofunique::deque_of_unique<std::string> dou3 = {"morning", "good"};
+  EXPECT_EQ(dou2 <=> dou3, std::weak_ordering::less);
+
+  // Test 4: Lexicographical comparison
+  containerofunique::deque_of_unique<std::string> dou4 = {"apple", "banana"};
+  EXPECT_EQ(dou4 <=> dou1_1, std::weak_ordering::less);
+
+  // Test 5: Empty deques
+  containerofunique::deque_of_unique<std::string> dou_empty1;
+  containerofunique::deque_of_unique<std::string> dou_empty2;
+  EXPECT_EQ(dou_empty1 <=> dou_empty2, std::strong_ordering::equal);
+  EXPECT_EQ(dou_empty1 <=> dou1_1, std::weak_ordering::less);
 }

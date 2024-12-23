@@ -6,6 +6,7 @@
 #include <compare>
 #include <concepts>
 #include <deque>
+#include <numeric>
 #include <stdexcept>
 #include <unordered_set>
 #include <utility>
@@ -52,14 +53,40 @@ TEST(DequeOfUniqueTest, ConstructorWithInitializerListChecksDequeAndSet) {
               ::testing::UnorderedElementsAreArray(dq3));
 }
 
-TEST(DequeOfUniqueTest, CopyConstructor) {
-  containerofunique::deque_of_unique dou1 = {1, 2, 3, 4};
+TEST(DequeOfUniqueTest, CopyConstructor_EmptyDeque) {
+  containerofunique::deque_of_unique<int> dou1;
   containerofunique::deque_of_unique<int> dou2(dou1);
-  std::deque<int> dq = {1, 2, 3, 4};
-  EXPECT_EQ(dou2.deque(), dou1.deque());
-  dou1.push_back(
-      5); // This is used to suppress warning of
-          // [performance-unnecessary-copy-initialization,-warnings-as-errors]
+  EXPECT_TRUE(dou2.deque().empty());
+  EXPECT_TRUE(dou2.set().empty());
+}
+
+TEST(DequeOfUniqueTest, CopyConstructor_SingleElement) {
+  containerofunique::deque_of_unique<int> dou1 = {42};
+  containerofunique::deque_of_unique<int> dou2(dou1);
+  std::deque<int> dq = {42};
+  EXPECT_EQ(dou2.deque(), dq);
+  EXPECT_THAT(dou2.set(), ::testing::UnorderedElementsAreArray(dq));
+}
+
+TEST(DequeOfUniqueTest, CopyConstructor_Independence) {
+  containerofunique::deque_of_unique<int> dou1 = {1, 2, 3};
+  containerofunique::deque_of_unique<int> dou2(dou1);
+
+  dou1.push_back(4); // Modify the original
+  EXPECT_EQ(dou1.deque(), std::deque<int>({1, 2, 3, 4}));
+  EXPECT_EQ(dou2.deque(),
+            std::deque<int>({1, 2, 3})); // Copy should remain unchanged
+}
+TEST(DequeOfUniqueTest, CopyConstructor_LargeData) {
+  std::deque<int> large_data(1000);
+  std::iota(large_data.begin(), large_data.end(), 0);
+
+  containerofunique::deque_of_unique<int> dou1(large_data.begin(),
+                                               large_data.end());
+  containerofunique::deque_of_unique<int> dou2(dou1);
+
+  EXPECT_EQ(dou1.deque(), dou2.deque());
+  EXPECT_THAT(dou2.set(), ::testing::UnorderedElementsAreArray(large_data));
 }
 
 TEST(DequeOfUniqueTest, MoveConstructor) {

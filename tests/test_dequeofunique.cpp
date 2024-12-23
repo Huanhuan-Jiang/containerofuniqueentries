@@ -209,7 +209,7 @@ TEST(DequeOfUniqueTest, InsertRangeTest) {
   auto result5_1 =
       dou5_1.insert(dou5_1.cbegin(), dou5_2.cbegin(), dou5_2.cbegin() + 2);
   EXPECT_EQ(dou5_1.deque(), dq5);
-  EXPECT_EQ(*result5_1, *(dou5_1.cbegin() + 1));
+  EXPECT_EQ(*result5_1, *dou5_1.cbegin());
   auto result5_2 =
       dou5_1.insert(dou5_1.cbegin(), dou5_3.cbegin(), dou5_3.cbegin() + 2);
   EXPECT_EQ(dou5_1.deque(), dq5);

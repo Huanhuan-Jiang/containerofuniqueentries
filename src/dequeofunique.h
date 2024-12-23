@@ -99,7 +99,8 @@ public:
 
   template <class input_it>
   const_iterator insert(const_iterator pos, input_it first, input_it last) {
-    const_iterator first_inserted = pos;
+    auto pos_index = pos - deque_.cbegin();
+    auto first_inserted_index = pos_index;
     auto temp_pos = deque_.begin() + (pos - deque_.cbegin());
     auto any_inserted = false;
 
@@ -107,13 +108,14 @@ public:
       if (set_.insert(*it).second) {
         temp_pos = deque_.insert(temp_pos, *it);
         if (!any_inserted) {
-          first_inserted = temp_pos;
+          first_inserted_index = temp_pos - deque_.cbegin();
           any_inserted = true;
         }
         ++temp_pos;
       }
     }
-    return any_inserted ? first_inserted : pos;
+    return any_inserted ? first_inserted_index + deque_.cbegin()
+                        : pos_index + deque_.cbegin();
   }
 
   const_iterator insert(const_iterator pos, std::initializer_list<T> ilist) {

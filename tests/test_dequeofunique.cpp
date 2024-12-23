@@ -827,11 +827,30 @@ TEST(DequeOfUniqueTest, Empty) {
 }
 
 TEST(DequeOfUniqueTest, Size) {
+  // Test 1: Deque with a single element
   containerofunique::deque_of_unique<std::string> dou1 = {"good"};
   EXPECT_EQ(dou1.size(), 1);
+
+  // Test 2: Deque with multiple unique elements
   containerofunique::deque_of_unique<std::string> dou2 = {"good", "morning",
                                                           "hello", "world"};
   EXPECT_EQ(dou2.size(), 4);
+
+  // Adding a new unique element increases the size
+  dou2.push_back("new");
+  EXPECT_EQ(dou2.size(), 5);
+
+  // Removing an element decreases the size
+  dou2.pop_front();
+  EXPECT_EQ(dou2.size(), 4);
+
+  // Attempting to add a duplicate element does not change the size
+  dou2.push_back("good"); // "good" is already in the deque
+  EXPECT_EQ(dou2.size(), 4);
+
+  // Test 3: Empty deque
+  containerofunique::deque_of_unique<std::string> dou3;
+  EXPECT_EQ(dou3.size(), 0); // Corrected to check dou3
 }
 
 TEST(DequeOfUniqueTest, Operator) {

@@ -164,9 +164,11 @@ public:
   }
 
   void pop_back() {
-    const auto &f = deque_.back();
-    deque_.pop_back();
-    set_.erase(f);
+    if (!deque_.empty()) {
+      const auto &f = deque_.back();
+      deque_.pop_back();
+      set_.erase(f);
+    }
   }
 
   bool push_front(const T &value) {

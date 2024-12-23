@@ -614,8 +614,8 @@ TEST(DequeOfUniqueTest, EmplaceBack_NonStringType) {
 TEST(DequeOfUniqueTest, PopFront_EmptyDeque) {
   containerofunique::deque_of_unique<std::string> dou;
   EXPECT_NO_THROW(dou.pop_front());
-  // EXPECT_TRUE(dou.deque().empty());
-  // EXPECT_TRUE(dou.set().empty());
+  EXPECT_TRUE(dou.deque().empty());
+  EXPECT_TRUE(dou.set().empty());
 }
 
 TEST(DequeOfUniqueTest, PopFront_SingleElement) {
@@ -653,12 +653,34 @@ TEST(DequeOfUniqueTest, Front_AfterModification) {
   EXPECT_EQ(dou.front(), "hello"); // The front should now be "hello"
 }
 
-TEST(DequeOfUniqueTest, PopBack) {
-  containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
-  std::deque<std::string> dq = {"hello"};
+TEST(DequeOfUniqueTest, PopBack_EmptyDeque) {
+  containerofunique::deque_of_unique<std::string> dou;
+  EXPECT_NO_THROW(dou.pop_back());
+  EXPECT_TRUE(dou.deque().empty());
+  EXPECT_TRUE(dou.set().empty());
+}
+
+TEST(DequeOfUniqueTest, PopBack_SingleElement) {
+  containerofunique::deque_of_unique<std::string> dou = {"hello"};
   dou.pop_back();
-  EXPECT_EQ(dou.deque(), dq);
-  EXPECT_THAT(dou.set(), ::testing::UnorderedElementsAreArray(dq));
+  EXPECT_TRUE(dou.deque().empty());
+  EXPECT_TRUE(dou.set().empty());
+}
+
+TEST(DequeOfUniqueTest, PopBack_MultipleSequential) {
+  containerofunique::deque_of_unique<std::string> dou = {"hello", "world",
+                                                         "goodbye"};
+  dou.pop_back();
+  EXPECT_EQ(dou.deque(), (std::deque<std::string>{"hello", "world"}));
+  EXPECT_THAT(dou.set(), ::testing::UnorderedElementsAre("hello", "world"));
+
+  dou.pop_back();
+  EXPECT_EQ(dou.deque(), (std::deque<std::string>{"hello"}));
+  EXPECT_THAT(dou.set(), ::testing::UnorderedElementsAre("hello"));
+
+  dou.pop_back();
+  EXPECT_TRUE(dou.deque().empty());
+  EXPECT_TRUE(dou.set().empty());
 }
 
 TEST(DequeOfUniqueTest, PushFront) {

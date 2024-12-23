@@ -683,19 +683,52 @@ TEST(DequeOfUniqueTest, PopBack_MultipleSequential) {
   EXPECT_TRUE(dou.set().empty());
 }
 
-TEST(DequeOfUniqueTest, PushFront) {
-  containerofunique::deque_of_unique<std::string> dou1 = {"hello", "world"};
-  std::deque<std::string> dq1 = {"good", "hello", "world"};
-  dou1.push_front("good");
-  EXPECT_EQ(dou1.deque(), dq1);
-  EXPECT_THAT(dou1.set(), ::testing::UnorderedElementsAreArray(dq1));
+TEST(DequeOfUniqueTest, PushFront_NewElement) {
+  containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
+  std::deque<std::string> expected = {"good", "hello", "world"};
 
-  containerofunique::deque_of_unique<std::string> dou2 = {"hello", "world"};
-  std::deque<std::string> dq2 = {"good", "hello", "world"};
-  std::string str2 = "good";
-  dou2.push_front(std::move(str2));
-  EXPECT_EQ(dou2.deque(), dq2);
-  EXPECT_THAT(dou2.set(), ::testing::UnorderedElementsAreArray(dq2));
+  // Test pushing a new element to the front
+  bool result = dou.push_front("good");
+  EXPECT_TRUE(result);
+  EXPECT_EQ(dou.deque(), expected);
+  EXPECT_THAT(dou.set(), ::testing::UnorderedElementsAreArray(expected));
+}
+
+TEST(DequeOfUniqueTest, PushFront_DuplicateElement) {
+  containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
+  std::deque<std::string> expected = {"hello", "world"};
+
+  // Test pushing a duplicate element
+  bool result = dou.push_front("hello");
+  EXPECT_FALSE(result);
+  EXPECT_EQ(dou.deque(), expected);
+  EXPECT_THAT(dou.set(), ::testing::UnorderedElementsAreArray(expected));
+}
+
+TEST(DequeOfUniqueTest, PushFront_Rvalue) {
+  containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
+  std::deque<std::string> expected = {"good", "hello", "world"};
+
+  // Test pushing an rvalue to the front
+  std::string str = "good";
+  bool result = dou.push_front(std::move(str));
+  EXPECT_TRUE(result);
+  EXPECT_EQ(dou.deque(), expected);
+  EXPECT_THAT(dou.set(), ::testing::UnorderedElementsAreArray(expected));
+  EXPECT_TRUE(str.empty());
+}
+
+TEST(DequeOfUniqueTest, PushFront_EmptyRvalue) {
+  containerofunique::deque_of_unique<std::string> dou = {"hello", "world"};
+  std::deque<std::string> expected = {"", "hello", "world"};
+
+  // Test pushing an empty string as an rvalue
+  std::string str = "";
+  bool result = dou.push_front(std::move(str));
+  EXPECT_TRUE(result);
+  EXPECT_EQ(dou.deque(), expected);
+  EXPECT_THAT(dou.set(), ::testing::UnorderedElementsAreArray(expected));
+  EXPECT_TRUE(str.empty());
 }
 
 TEST(DequeOfUniqueTest, PushBack) {

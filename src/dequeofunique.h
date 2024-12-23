@@ -72,14 +72,22 @@ public:
   }
 
   const_iterator erase(const_iterator pos) {
+    if (deque_.empty()) {
+      return deque_.cend();
+    }
     set_.erase(*pos);
     return deque_.erase(pos);
   }
 
   const_iterator erase(const_iterator first, const_iterator last) {
+    if (first == last) {
+      return last;
+    }
+
     for (auto it = first; it != last; ++it) {
       set_.erase(*it);
     }
+
     return deque_.erase(first, last);
   }
 

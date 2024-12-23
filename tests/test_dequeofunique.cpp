@@ -213,19 +213,59 @@ TEST(DequeOfUniqueTest, Iterator_ModificationNotAllowed) {
   ASSERT_TRUE(std::is_const_v<std::remove_reference_t<decltype(*const_it)>>);
 }
 
-TEST(DequeOfUniqueTest, ClearAndErase) {
+TEST(DequeOfUniqueTest, Clear) {
+  containerofunique::deque_of_unique<int> dou = {1, 2, 3, 4, 5};
+  dou.clear();
+
+  EXPECT_EQ(dou.deque().size(), 0); // Deque should be empty
+  EXPECT_THAT(dou.set(),
+              ::testing::UnorderedElementsAre()); // Set should be empty
+}
+
+TEST(DequeOfUniqueTest, Erase_SingleElement) {
+  containerofunique::deque_of_unique<int> dou = {1, 2, 3, 4, 5};
+  std::deque<int> expected_deque = {2, 3, 4, 5};
+  std::unordered_set<int> expected_set = {2, 3, 4, 5};
+
+  dou.erase(dou.cbegin());
+  EXPECT_EQ(dou.deque(), expected_deque);
+  EXPECT_THAT(dou.set(), ::testing::UnorderedElementsAreArray(expected_set));
+}
+
+TEST(DequeOfUniqueTest, Erase_FromEmptyContainer) {
+  containerofunique::deque_of_unique<int> dou;
+  EXPECT_NO_THROW(dou.erase(dou.cbegin()));
+  EXPECT_EQ(dou.deque().size(), 0);
+}
+
+TEST(DequeOfUniqueTest, EraseEmptyRange) {
   containerofunique::deque_of_unique<int> dou1 = {1, 2, 3, 4, 5, 6};
-  std::deque<int> dq1 = {2, 3, 4, 5, 6};
-  std::unordered_set<int> set1 = {2, 3, 4, 5, 6};
+  std::deque<int> dq2 = {1, 2, 3, 4, 5, 6};
+  std::unordered_set<int> set2 = {1, 2, 3, 4, 5, 6};
 
-  dou1.erase(dou1.cbegin());
-  EXPECT_EQ(dou1.deque(), dq1);
-  EXPECT_THAT(dou1.set(), ::testing::UnorderedElementsAreArray(set1));
+  auto result = dou1.erase(dou1.cbegin(), dou1.cbegin());
+  EXPECT_EQ(result, dou1.cbegin());
+  EXPECT_EQ(dou1.deque(), dq2);
+  EXPECT_THAT(dou1.set(), ::testing::UnorderedElementsAreArray(set2));
+}
 
+TEST(DequeOfUniqueTest, EraseRangeOfElements) {
+  containerofunique::deque_of_unique<int> dou1 = {1, 2, 3, 4, 5, 6};
   std::deque<int> dq2 = {4, 5, 6};
   std::unordered_set<int> set2 = {4, 5, 6};
 
-  dou1.erase(dou1.cbegin(), dou1.cbegin() + 2);
+  dou1.erase(dou1.cbegin(), dou1.cbegin() + 3);
+  EXPECT_EQ(dou1.deque(), dq2);
+  EXPECT_THAT(dou1.set(), ::testing::UnorderedElementsAreArray(set2));
+}
+
+TEST(DequeOfUniqueTest, EraseAllElements) {
+  containerofunique::deque_of_unique<int> dou1 = {1, 2, 3, 4, 5, 6};
+  std::deque<int> dq2 = {};
+  std::unordered_set<int> set2 = {};
+
+  auto result = dou1.erase(dou1.cbegin(), dou1.cend());
+  EXPECT_EQ(result, dou1.cend());
   EXPECT_EQ(dou1.deque(), dq2);
   EXPECT_THAT(dou1.set(), ::testing::UnorderedElementsAreArray(set2));
 }

@@ -1,17 +1,17 @@
 #pragma once
 
 #include <deque>
-#include <functional> // For std::hash
+#include <functional>  // For std::hash
 #include <initializer_list>
-#include <optional> // For std::nullopt
+#include <optional>  // For std::nullopt
 #include <unordered_set>
-#include <utility> // For std::swap
+#include <utility>  // For std::swap
 
 namespace containerofunique {
 
 template <class T, class Hash = std::hash<T>, class KeyEqual = std::equal_to<T>>
 class deque_of_unique {
-public:
+ public:
   // *Member types
   using value_type = T;
   using key_type = T;
@@ -29,7 +29,8 @@ public:
   // Constructor
   deque_of_unique() = default;
 
-  template <class input_it> deque_of_unique(input_it first, input_it last) {
+  template <class input_it>
+  deque_of_unique(input_it first, input_it last) {
     _push_back(first, last);
   }
 
@@ -205,7 +206,8 @@ public:
     return false;
   }
 
-  template <class input_it> void _push_back(input_it first, input_it last) {
+  template <class input_it>
+  void _push_back(input_it first, input_it last) {
     while (first != last) {
       push_back(*first++);
     }
@@ -246,8 +248,8 @@ public:
   const DequeType &deque() const { return deque_; }
   const UnorderedSetType &set() const { return set_; }
 
-private:
+ private:
   DequeType deque_;
   UnorderedSetType set_;
-}; // class deque_of_unique
-}; // namespace containerofunique
+};  // class deque_of_unique
+};  // namespace containerofunique

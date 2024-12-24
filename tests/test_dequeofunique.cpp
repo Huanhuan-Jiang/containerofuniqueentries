@@ -479,6 +479,7 @@ TEST(DequeOfUniqueTest, EmplaceFront_NewElement) {
   dq.emplace_front("good");
   EXPECT_EQ(*dou.cbegin(), "good");
   ASSERT_TRUE(result.has_value());
+  // clang-tidy: bugprone-unchecked-optional-access
   EXPECT_EQ(result.value().get(), "good");
   EXPECT_EQ(dou.deque(), dq);
 }
@@ -505,6 +506,7 @@ TEST(DequeOfUniqueTest, EmplaceFront_Rvalue) {
   std::deque<std::string> dq = {"good", "hello", "world"};
   EXPECT_EQ(*dou.cbegin(), "good");
   ASSERT_TRUE(result.has_value());
+  // clang-tidy: bugprone-unchecked-optional-access
   EXPECT_EQ(result.value().get(), "good");
   EXPECT_EQ(dou.deque(), dq);
 }
@@ -531,6 +533,7 @@ TEST(DequeOfUniqueTest, EmplaceFront_EmptyDeque) {
   std::deque<std::string> dq = {"first"};
   EXPECT_EQ(*dou_empty.cbegin(), "first");
   ASSERT_TRUE(result_empty.has_value());
+  // clang-tidy: bugprone-unchecked-optional-access
   EXPECT_EQ(result_empty.value().get(), "first");
   EXPECT_EQ(dou_empty.deque(), dq);
 }
@@ -561,6 +564,7 @@ TEST(DequeOfUniqueTest, EmplaceFront_NonStringType) {
   std::deque<int> dq = {1, 2, 3, 4};
   EXPECT_EQ(*dou.cbegin(), 4);
   ASSERT_TRUE(result.has_value());
+  // clang-tidy: bugprone-unchecked-optional-access
   EXPECT_EQ(result.value(), 4);
 }
 
@@ -573,6 +577,7 @@ TEST(DequeOfUniqueTest, EmplaceBack_NewElement) {
   dq.emplace_back("good");
   EXPECT_EQ(*(dou.cend() - 1), "good");
   ASSERT_TRUE(result.has_value());
+  // clang-tidy: bugprone-unchecked-optional-access
   EXPECT_EQ(result.value().get(), "good");
   EXPECT_EQ(dou.deque(), dq);
 }
@@ -599,6 +604,7 @@ TEST(DequeOfUniqueTest, EmplaceBack_Rvalue) {
   std::deque<std::string> dq = {"hello", "world", "good"};
   EXPECT_EQ(*(dou.cend() - 1), "good");
   ASSERT_TRUE(result.has_value());
+  // clang-tidy: bugprone-unchecked-optional-access
   EXPECT_EQ(result.value().get(), "good");
   EXPECT_EQ(dou.deque(), dq);
 }
@@ -625,6 +631,7 @@ TEST(DequeOfUniqueTest, EmplaceBack_EmptyDeque) {
   std::deque<std::string> dq = {"first"};
   EXPECT_EQ(*dou_empty.cbegin(), "first");
   ASSERT_TRUE(result_empty.has_value());
+  // clang-tidy: bugprone-unchecked-optional-access
   EXPECT_EQ(result_empty.value().get(), "first");
   EXPECT_EQ(dou_empty.deque(), dq);
 }
@@ -655,6 +662,7 @@ TEST(DequeOfUniqueTest, EmplaceBack_NonStringType) {
   std::deque<int> dq = {1, 2, 3, 4};
   EXPECT_EQ(*(dou.cend() - 1), 4);
   ASSERT_TRUE(result.has_value());
+  // clang-tidy: bugprone-unchecked-optional-access
   EXPECT_EQ(result.value().get(), 4);
   EXPECT_EQ(dou.deque(), dq);
 }

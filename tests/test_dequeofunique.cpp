@@ -898,7 +898,7 @@ TEST(DequeOfUniqueTest, Size) {
   EXPECT_EQ(dou2.size(), 4);
 
   // Attempting to add a duplicate element does not change the size
-  dou2.push_back("morning"); // "good" is already in the deque
+  dou2.push_back("morning"); // "morning" is already in the deque
   EXPECT_EQ(dou2.size(), 4);
 
   // Test 3: Empty deque

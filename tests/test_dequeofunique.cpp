@@ -82,6 +82,7 @@ TEST(DequeOfUniqueTest, CopyConstructor_Independence) {
 
 TEST(DequeOfUniqueTest, CopyConstructor_LargeData) {
   std::deque<int> large_data(1000);
+  // NOLINTNEXTLINE(modernize-use-std-ranges, modernize-use-algorith)
   std::iota(large_data.begin(), large_data.end(), 0);
 
   // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)

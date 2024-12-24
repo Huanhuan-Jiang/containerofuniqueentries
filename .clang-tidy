@@ -62,4 +62,3 @@ HeaderFilterRegex: '^(?!(.*\/)?(build|thirdparty)\/)'
 CheckOptions:
   - key:             modernize-pass-by-value.IncludeStyle
     value:           google
-    

@@ -2,7 +2,3 @@
 .git
 .vscode/
 build/
-output.pdf
---color
-format_changes.log
-dequeofunique
